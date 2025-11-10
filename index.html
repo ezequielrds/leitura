@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leitura por Sílabas – Estrelinhas ⭐</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>🔤</span></div>
+        <h1>Leitura por Sílabas</h1>
+      </div>
+      <div class="stats">
+        <div class="stat" title="Sequência atual">
+          <span>Sequência</span>
+          <div id="streakStars" class="stars" aria-live="polite"></div>
+        </div>
+        <div class="stat" title="Recorde desta sessão">
+          <span>Recorde</span>
+          <b id="highScore">0</b><span class="star">⭐</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel word-card" aria-live="polite">
+      <div id="word" class="word" aria-label="Palavra atual">—</div>
+      <div class="toolbar">
+        <button id="helpBtn" class="btn-help">Mostrar sílabas</button>
+        <button id="speakBtn" class="btn-ghost" title="Ouvir a palavra">🔈 Ouvir</button>
+      </div>
+      <div class="actions">
+        <button id="correctBtn" class="btn-good">Acertei sozinho(a) ✨</button>
+        <button id="nextBtn" class="btn-primary">Próxima palavra ➜</button>
+      </div>
+      <div id="message" class="message"></div>
+    </section>
+
+    <details class="config">
+      <summary>Carregar/editar lista de palavras (sílabas separadas por "-")</summary>
+      <p style="margin:10px 0 6px;color:var(--muted)">Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>ca-sa</code>, <code>ho-ra</code>, <code>so-fá</code></p>
+      <textarea id="wordsInput"></textarea>
+      <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap">
+        <button id="loadBtn" class="btn-primary">Usar lista</button>
+        <button id="shuffleBtn" class="btn-ghost">Embaralhar novamente</button>
+        <button id="resetBtn" class="btn-ghost" title="Limpa pontuação da sessão">Zerar pontuação</button>
+      </div>
+    </details>
+
+    <footer>
+      Dica: use <b>Enter</b> para “Acertei” e <b>Barra de espaço</b> para “Próxima”.
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

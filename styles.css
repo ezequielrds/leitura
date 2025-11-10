@@ -1,0 +1,71 @@
+:root{
+      --bg:#0f172a;          /* slate-900 */
+      --card:#111827;        /* gray-900 */
+      --muted:#94a3b8;       /* slate-400 */
+      --text:#e5e7eb;        /* gray-200 */
+      --accent:#60a5fa;      /* blue-400 */
+      --accent-2:#f97316;    /* orange-500 */
+      --ok:#22c55e;          /* green-500 */
+      --warn:#f59e0b;        /* amber-500 */
+      --danger:#ef4444;      /* red-500 */
+      --shadow: 0 10px 25px rgba(0,0,0,.25);
+      --radius: 18px;
+    }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{ margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; background:linear-gradient(160deg,#0b1024,#0a162f 50%, #0b223b); color:var(--text); -webkit-font-smoothing:antialiased }
+    .app{ max-width:820px; margin:0 auto; padding:clamp(16px,3vw,28px); display:grid; gap:16px }
+
+    header{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px }
+    .brand{ display:flex; align-items:center; gap:10px }
+    .logo{ width:42px; height:42px; border-radius:12px; background:radial-gradient(120px 70px at 30% 30%, #60a5fa22, transparent), linear-gradient(135deg,#0f2a4b,#13243f); display:grid; place-items:center; box-shadow:var(--shadow) }
+    .logo span{ font-size:22px }
+    h1{ font-size:clamp(20px,2.4vw,28px); margin:0; letter-spacing:.3px }
+
+    .stats{ display:flex; align-items:center; gap:14px; flex-wrap:wrap }
+    .stat{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); padding:10px 12px; border-radius:14px; display:flex; align-items:center; gap:8px }
+    .stat b{ font-size:18px }
+
+    .panel{ background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); padding:clamp(14px,2.2vw,20px); box-shadow:var(--shadow) }
+
+    .word-card{ text-align:center; padding:28px 16px; display:grid; gap:18px }
+    .word{ font-size:clamp(40px, 8vw, 76px); font-weight:800; letter-spacing:1px; line-height:1.05; word-break:break-word }
+    .syllable{ padding:0 .08em; border-radius:8px }
+    .syllable:nth-child(odd){ color:var(--accent) }
+    .syllable:nth-child(even){ color:var(--accent-2) }
+
+    .syllable-btn{ appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:8px 12px; border-radius:8px; font-weight:800; font-size:clamp(40px, 8vw, 76px); cursor:pointer; transition:.2s transform, .2s background, .2s border-color; box-shadow:0 6px 16px rgba(0,0,0,.25) }
+    .syllable-btn:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.24) }
+    .syllable-btn:active{ transform:translateY(0) scale(.98) }
+
+    .actions{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; align-items:center; justify-items:stretch }
+    .actions button{ width:100% }
+
+    .toolbar{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center }
+
+    button{ appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:12px 14px; border-radius:14px; font-weight:650; font-size:16px; cursor:pointer; transition:.2s transform, .2s background, .2s border-color; box-shadow:0 6px 16px rgba(0,0,0,.25) }
+    button:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.24) }
+    button:active{ transform:translateY(0) scale(.98) }
+    .btn-primary{ background:linear-gradient(180deg, #2563eb, #1d4ed8); border-color:#3b82f6 }
+    .btn-good{ background:linear-gradient(180deg, #16a34a, #15803d); border-color:#22c55e }
+    .btn-help{ background:linear-gradient(180deg, #f59e0b, #b45309); border-color:#fbbf24 }
+    .btn-ghost{ background:rgba(255,255,255,.06) }
+
+    .stars{ display:flex; gap:4px; align-items:center; flex-wrap:wrap }
+    .star{ font-size:20px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.3)) }
+
+    .message{ text-align:center; color:var(--muted); min-height:20px }
+
+    details.config{ background:rgba(255,255,255,.04); border:1px dashed rgba(255,255,255,.12); border-radius:14px; padding:8px 12px }
+    details[open].config{ border-style:solid }
+    summary{ cursor:pointer; font-weight:700; color:#c7d2fe }
+    textarea{ width:100%; min-height:120px; resize:vertical; background:#0b1222; color:var(--text); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:12px; font-size:15px }
+
+    .confetti{ position:fixed; top:-10px; width:10px; height:14px; opacity:.9; transform:rotate(0deg); animation:fall 1200ms linear forwards }
+    @keyframes fall{ to{ transform:translateY(100vh) rotate(360deg); opacity:.0 } }
+
+    footer{ text-align:center; color:var(--muted); font-size:13px }
+
+    @media (max-width:520px){
+      .actions{ grid-template-columns:1fr }
+    }
