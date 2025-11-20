@@ -23,36 +23,43 @@
     h1{ font-size:clamp(20px,2.4vw,28px); margin:0; letter-spacing:.3px }
 
     .stats{ display:flex; align-items:center; gap:14px; flex-wrap:wrap }
-    .stat{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); padding:10px 12px; border-radius:14px; display:flex; align-items:center; gap:8px }
+    .stat{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); padding:10px 12px; border-radius:14px; display:flex; align-items:center; gap:8px; transition:.3s all }
     .stat b{ font-size:18px }
+    .stat .medal{ font-size:18px; filter:drop-shadow(0 2px 3px rgba(0,0,0,.4)); animation:pulse 2s ease-in-out infinite }
 
     .panel{ background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); padding:clamp(14px,2.2vw,20px); box-shadow:var(--shadow) }
 
-    .word-card{ text-align:center; padding:28px 16px; display:grid; gap:18px }
-    .word{ font-size:clamp(40px, 8vw, 76px); font-weight:800; letter-spacing:1px; line-height:1.05; word-break:break-word }
+    .word-card{ text-align:center; padding:28px 16px; display:grid; gap:18px; position:relative; overflow:visible }
+    .word{ font-size:clamp(40px, 8vw, 76px); font-weight:800; letter-spacing:1px; line-height:1.05; word-break:break-word; transition:.3s transform }
+    .word.bounce{ animation:bounce .6s ease }
     .syllable{ padding:0 .08em; border-radius:8px }
     .syllable:nth-child(odd){ color:var(--accent) }
     .syllable:nth-child(even){ color:var(--accent-2) }
 
-    .syllable-btn{ appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:8px 12px; border-radius:8px; font-weight:800; font-size:clamp(40px, 8vw, 76px); cursor:pointer; transition:.2s transform, .2s background, .2s border-color; box-shadow:0 6px 16px rgba(0,0,0,.25) }
-    .syllable-btn:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.24) }
+    .syllable-btn{ appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:8px 12px; border-radius:8px; font-weight:800; font-size:clamp(40px, 8vw, 76px); cursor:pointer; transition:.2s transform, .2s background, .2s border-color, .2s box-shadow; box-shadow:0 6px 16px rgba(0,0,0,.25) }
+    .syllable-btn:hover{ transform:translateY(-2px) scale(1.05); border-color:rgba(255,255,255,.24); box-shadow:0 8px 20px rgba(96,165,250,.3) }
     .syllable-btn:active{ transform:translateY(0) scale(.98) }
+    .syllable-btn.clicked{ animation:syllable-pop .4s ease }
 
     .actions{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; align-items:center; justify-items:stretch }
     .actions button{ width:100% }
 
     .toolbar{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center }
 
-    button{ appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:12px 14px; border-radius:14px; font-weight:650; font-size:16px; cursor:pointer; transition:.2s transform, .2s background, .2s border-color; box-shadow:0 6px 16px rgba(0,0,0,.25) }
-    button:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.24) }
+    button{ appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:12px 14px; border-radius:14px; font-weight:650; font-size:16px; cursor:pointer; transition:.2s transform, .2s background, .2s border-color; box-shadow:0 6px 16px rgba(0,0,0,.25); user-select:none }
+    button:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.24); background:rgba(255,255,255,.08) }
     button:active{ transform:translateY(0) scale(.98) }
     .btn-primary{ background:linear-gradient(180deg, #2563eb, #1d4ed8); border-color:#3b82f6 }
+    .btn-primary:hover{ background:linear-gradient(180deg, #3b82f6, #2563eb) }
     .btn-good{ background:linear-gradient(180deg, #16a34a, #15803d); border-color:#22c55e }
+    .btn-good:hover{ background:linear-gradient(180deg, #22c55e, #16a34a) }
     .btn-help{ background:linear-gradient(180deg, #f59e0b, #b45309); border-color:#fbbf24 }
+    .btn-help:hover{ background:linear-gradient(180deg, #fbbf24, #f59e0b) }
     .btn-ghost{ background:rgba(255,255,255,.06) }
 
     .stars{ display:flex; gap:4px; align-items:center; flex-wrap:wrap }
-    .star{ font-size:20px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.3)) }
+    .star{ font-size:20px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.3)); animation:star-appear .5s ease-out }
+    .star-grow{ animation:star-grow .6s ease-out }
 
     .message{ text-align:center; color:var(--muted); min-height:20px }
 
@@ -63,6 +70,31 @@
 
     .confetti{ position:fixed; top:-10px; width:10px; height:14px; opacity:.9; transform:rotate(0deg); animation:fall 1200ms linear forwards }
     @keyframes fall{ to{ transform:translateY(100vh) rotate(360deg); opacity:.0 } }
+
+    .progress-container{ margin-bottom:8px }
+    .progress-label{ display:flex; justify-content:space-between; margin-bottom:6px; font-size:14px; color:var(--muted) }
+    .progress-bar{ width:100%; height:12px; background:rgba(0,0,0,.3); border-radius:20px; overflow:hidden; border:1px solid rgba(255,255,255,.08) }
+    .progress-fill{ height:100%; background:linear-gradient(90deg, #22c55e, #16a34a, #15803d); transition:width .5s ease; border-radius:20px; box-shadow:0 0 10px rgba(34,197,94,.5) }
+
+    .mascot{ position:absolute; top:10px; right:20px; font-size:48px; transition:.3s all; filter:drop-shadow(0 4px 6px rgba(0,0,0,.3)); cursor:pointer }
+    .mascot:hover{ transform:scale(1.1) rotate(5deg) }
+    .mascot.happy{ animation:mascot-happy .6s ease }
+    .mascot.excited{ animation:mascot-excited .8s ease }
+
+    .word-difficulty{ font-size:14px; color:var(--muted); margin-bottom:8px; font-weight:600; opacity:.8 }
+
+    .achievement-popup{ position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) scale(0); background:linear-gradient(135deg, #fbbf24, #f59e0b); padding:24px 32px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.5); font-size:24px; font-weight:700; color:#000; z-index:1000; transition:.3s all; border:3px solid #fde047 }
+    .achievement-popup.show{ transform:translate(-50%, -50%) scale(1); animation:achievement-show .6s ease }
+    .achievement-popup .achievement-icon{ font-size:64px; margin-bottom:8px }
+
+    @keyframes pulse{ 0%, 100%{ transform:scale(1) } 50%{ transform:scale(1.15) } }
+    @keyframes bounce{ 0%, 20%, 50%, 80%, 100%{ transform:translateY(0) } 40%{ transform:translateY(-20px) } 60%{ transform:translateY(-10px) } }
+    @keyframes star-appear{ 0%{ transform:scale(0) rotate(-180deg); opacity:0 } 100%{ transform:scale(1) rotate(0); opacity:1 } }
+    @keyframes star-grow{ 0%{ transform:scale(1) } 50%{ transform:scale(1.4) } 100%{ transform:scale(1) } }
+    @keyframes syllable-pop{ 0%{ transform:scale(1) } 50%{ transform:scale(1.2); background:rgba(96,165,250,.3) } 100%{ transform:scale(1) } }
+    @keyframes mascot-happy{ 0%, 100%{ transform:rotate(0deg) } 25%{ transform:rotate(-10deg) scale(1.1) } 75%{ transform:rotate(10deg) scale(1.1) } }
+    @keyframes mascot-excited{ 0%, 100%{ transform:translateY(0) rotate(0deg) } 20%{ transform:translateY(-15px) rotate(-15deg) } 40%{ transform:translateY(-10px) rotate(15deg) } 60%{ transform:translateY(-15px) rotate(-10deg) } 80%{ transform:translateY(-5px) rotate(10deg) } }
+    @keyframes achievement-show{ 0%{ transform:translate(-50%, -50%) scale(0) rotate(-180deg) } 70%{ transform:translate(-50%, -50%) scale(1.1) rotate(10deg) } 100%{ transform:translate(-50%, -50%) scale(1) rotate(0deg) } }
 
     footer{ text-align:center; color:var(--muted); font-size:13px }
 
