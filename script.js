@@ -79,7 +79,12 @@ const el = {
   shuffleBtn: document.getElementById('shuffleBtn'),
   resetBtn: document.getElementById('resetBtn'),
   streakStars: document.getElementById('streakStars'),
-  highScore: document.getElementById('highScore')
+  highScore: document.getElementById('highScore'),
+  progressFill: document.getElementById('progressFill'),
+  progressText: document.getElementById('progressText'),
+  mascot: document.getElementById('mascot'),
+  achievementPopup: document.getElementById('achievementPopup'),
+  levelDisplay: document.getElementById('levelDisplay')
 };
 
 // Estado do jogo
@@ -90,10 +95,24 @@ let usedHelp = false; // se clicou ajuda na palavra atual
 let streak = 0; // sequência de acertos sem ajuda
 let high = Number(sessionStorage.getItem('readingStarsHighScore') || 0);
 let syllablesClicked = new Set(); // sílabas clicadas
+let totalWords = Number(localStorage.getItem('readingTotalWords') || 0); // total de palavras lidas corretamente
+let sessionWords = 0; // palavras da sessão atual
+let level = 1; // nível atual
+
+// Mascotes que mudam com o nível
+const mascots = ['🦉', '🐱', '🐶', '🐼', '🦁', '🦄', '🐉', '👑'];
 
 el.highScore.textContent = high;
 el.wordsInput.value = defaultWords.join(', ');
 el.speakBtn.style.display = 'none'; // esconder botão de ouvir inicialmente
+
+// Calcular nível baseado em palavras totais
+function calculateLevel() {
+  level = Math.floor(totalWords / 10) + 1;
+  if (level > mascots.length) level = mascots.length;
+  el.levelDisplay.textContent = level;
+  el.mascot.textContent = mascots[level - 1];
+}
 
 // ---------------------- Utilidades ----------------------
 function shuffle(array) {
@@ -141,6 +160,11 @@ function handleSyllableClick(e) {
   const index = parseInt(e.target.dataset.index);
   const parts = words[deck[idx]].split('-');
   const syllable = parts[index];
+  
+  // Adicionar animação
+  e.target.classList.add('clicked');
+  setTimeout(() => e.target.classList.remove('clicked'), 400);
+  
   const u = new SpeechSynthesisUtterance(syllable);
   const v = getPtVoice();
   if (v) u.voice = v;
@@ -165,9 +189,10 @@ function setMessage(msg = '', kind = 'muted') {
 }
 
 function renderStars(n) {
-  el.streakStars.innerHTML = n > 0 ? Array.from({
-    length: n
-  }, _ => '<span class="star">⭐</span>').join('') : '—';
+  const starsHtml = n > 0 ? Array.from({length: n}, (_, i) => 
+    `<span class="star ${i === n-1 ? 'star-grow' : ''}">⭐</span>`
+  ).join('') : '—';
+  el.streakStars.innerHTML = starsHtml;
 }
 
 function celebrate() {
@@ -187,6 +212,86 @@ function celebrate() {
     document.body.appendChild(piece);
     setTimeout(() => piece.remove(), 1600);
   }
+}
+
+function updateProgress() {
+  const percentage = (sessionWords / 20) * 100; // meta de 20 palavras
+  el.progressFill.style.width = Math.min(percentage, 100) + '%';
+  el.progressText.textContent = `${sessionWords} ${sessionWords === 1 ? 'palavra' : 'palavras'}`;
+}
+
+function showAchievement(icon, text) {
+  el.achievementPopup.innerHTML = `<div class="achievement-icon">${icon}</div>${text}`;
+  el.achievementPopup.classList.add('show');
+  playSuccessSound();
+  setTimeout(() => {
+    el.achievementPopup.classList.remove('show');
+  }, 3000);
+}
+
+function checkAchievements() {
+  if (totalWords === 5) {
+    showAchievement('🌟', 'Primeira Conquista!<br/>5 palavras lidas!');
+  } else if (totalWords === 10) {
+    showAchievement('🏆', 'Incrível!<br/>10 palavras lidas!');
+  } else if (totalWords === 20) {
+    showAchievement('💎', 'Brilhante!<br/>20 palavras lidas!');
+  } else if (totalWords === 50) {
+    showAchievement('👑', 'Campeão de Leitura!<br/>50 palavras lidas!');
+  } else if (totalWords === 100) {
+    showAchievement('🎓', 'Mestre da Leitura!<br/>100 palavras lidas!');
+  }
+  
+  // Verificar mudança de nível
+  const oldLevel = level;
+  calculateLevel();
+  if (level > oldLevel) {
+    showAchievement('🎊', `Subiu para o Nível ${level}!`);
+    el.mascot.classList.add('excited');
+    setTimeout(() => el.mascot.classList.remove('excited'), 800);
+  }
+}
+
+function animateMascot(type = 'happy') {
+  el.mascot.classList.add(type);
+  setTimeout(() => el.mascot.classList.remove(type), type === 'happy' ? 600 : 800);
+}
+
+function playSuccessSound() {
+  // Som de sucesso simples usando Web Audio API
+  if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.3);
+  }
+}
+
+function getEncouragingMessage() {
+  const messages = [
+    '👏 Muito bem! Continue assim!',
+    '🌟 Excelente trabalho!',
+    '🎯 Você está arrasando!',
+    '💪 Incrível! Você consegue!',
+    '✨ Perfeito! Você é demais!',
+    '🚀 Maravilhoso! Vamos continuar!',
+    '🎨 Fantástico! Que leitura linda!',
+    '🦸 Você é um super leitor!',
+    '🌈 Brilhante! Parabéns!'
+  ];
+  return messages[Math.floor(Math.random() * messages.length)];
 }
 
 function loadNewWord() {
@@ -237,10 +342,26 @@ el.correctBtn.addEventListener('click', () => {
     setTimeout(loadNewWord, 650);
     return;
   }
+  
+  // Incrementar contadores
   streak++;
+  totalWords++;
+  sessionWords++;
+  localStorage.setItem('readingTotalWords', String(totalWords));
+  
+  // Animações
+  el.word.classList.add('bounce');
+  setTimeout(() => el.word.classList.remove('bounce'), 600);
+  animateMascot('happy');
+  playSuccessSound();
+  
+  // Atualizar UI
   renderStars(streak);
-  setMessage('👏 Muito bem! +1 ⭐', 'win');
+  updateProgress();
+  setMessage(getEncouragingMessage() + ` +1 ⭐`, 'win');
   updateHighScore();
+  checkAchievements();
+  
   setTimeout(loadNewWord, 650);
 });
 
@@ -266,6 +387,8 @@ el.resetBtn.addEventListener('click', () => {
   high = 0;
   el.highScore.textContent = '0';
   sessionStorage.removeItem('readingStarsHighScore');
+  sessionWords = 0;
+  updateProgress();
   setMessage('Pontuações da sessão zeradas.');
 });
 
@@ -331,3 +454,18 @@ window.addEventListener('keydown', (e) => {
 buildDeck();
 loadNewWord();
 renderStars(0);
+calculateLevel();
+updateProgress();
+
+// Interação com mascote
+el.mascot.addEventListener('click', () => {
+  animateMascot('excited');
+  const encouragements = [
+    'Você está indo muito bem! 🎉',
+    'Continue assim, campeão! 💪',
+    'Eu acredito em você! ⭐',
+    'Vamos ler mais uma? 📚',
+    'Você é incrível! 🌟'
+  ];
+  setMessage(encouragements[Math.floor(Math.random() * encouragements.length)], 'win');
+});
