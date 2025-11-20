@@ -46,12 +46,15 @@
 
     .toolbar{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center }
 
-    button{ appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:12px 14px; border-radius:14px; font-weight:650; font-size:16px; cursor:pointer; transition:.2s transform, .2s background, .2s border-color; box-shadow:0 6px 16px rgba(0,0,0,.25) }
-    button:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.24) }
+    button{ appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:12px 14px; border-radius:14px; font-weight:650; font-size:16px; cursor:pointer; transition:.2s transform, .2s background, .2s border-color; box-shadow:0 6px 16px rgba(0,0,0,.25); user-select:none }
+    button:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.24); background:rgba(255,255,255,.08) }
     button:active{ transform:translateY(0) scale(.98) }
     .btn-primary{ background:linear-gradient(180deg, #2563eb, #1d4ed8); border-color:#3b82f6 }
+    .btn-primary:hover{ background:linear-gradient(180deg, #3b82f6, #2563eb) }
     .btn-good{ background:linear-gradient(180deg, #16a34a, #15803d); border-color:#22c55e }
+    .btn-good:hover{ background:linear-gradient(180deg, #22c55e, #16a34a) }
     .btn-help{ background:linear-gradient(180deg, #f59e0b, #b45309); border-color:#fbbf24 }
+    .btn-help:hover{ background:linear-gradient(180deg, #fbbf24, #f59e0b) }
     .btn-ghost{ background:rgba(255,255,255,.06) }
 
     .stars{ display:flex; gap:4px; align-items:center; flex-wrap:wrap }
@@ -77,6 +80,8 @@
     .mascot:hover{ transform:scale(1.1) rotate(5deg) }
     .mascot.happy{ animation:mascot-happy .6s ease }
     .mascot.excited{ animation:mascot-excited .8s ease }
+
+    .word-difficulty{ font-size:14px; color:var(--muted); margin-bottom:8px; font-weight:600; opacity:.8 }
 
     .achievement-popup{ position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) scale(0); background:linear-gradient(135deg, #fbbf24, #f59e0b); padding:24px 32px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.5); font-size:24px; font-weight:700; color:#000; z-index:1000; transition:.3s all; border:3px solid #fde047 }
     .achievement-popup.show{ transform:translate(-50%, -50%) scale(1); animation:achievement-show .6s ease }

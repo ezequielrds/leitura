@@ -84,7 +84,8 @@ const el = {
   progressText: document.getElementById('progressText'),
   mascot: document.getElementById('mascot'),
   achievementPopup: document.getElementById('achievementPopup'),
-  levelDisplay: document.getElementById('levelDisplay')
+  levelDisplay: document.getElementById('levelDisplay'),
+  wordDifficulty: document.getElementById('wordDifficulty')
 };
 
 // Estado do jogo
@@ -294,6 +295,14 @@ function getEncouragingMessage() {
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
+function getWordDifficulty(hyphenatedWord) {
+  const syllables = hyphenatedWord.split('-').length;
+  if (syllables === 1) return { text: '📖 Muito Fácil', color: '#22c55e' };
+  if (syllables === 2) return { text: '📗 Fácil', color: '#3b82f6' };
+  if (syllables === 3) return { text: '📘 Médio', color: '#f59e0b' };
+  return { text: '📕 Desafio', color: '#ef4444' };
+}
+
 function loadNewWord() {
   const w = nextFromDeck();
   usedHelp = false;
@@ -302,6 +311,11 @@ function loadNewWord() {
   renderWord(w, false);
   el.helpBtn.textContent = 'Mostrar sílabas';
   setMessage('');
+  
+  // Mostrar dificuldade
+  const difficulty = getWordDifficulty(w);
+  el.wordDifficulty.textContent = difficulty.text;
+  el.wordDifficulty.style.color = difficulty.color;
 }
 
 function updateHighScore() {
@@ -358,7 +372,14 @@ el.correctBtn.addEventListener('click', () => {
   // Atualizar UI
   renderStars(streak);
   updateProgress();
-  setMessage(getEncouragingMessage() + ` +1 ⭐`, 'win');
+  
+  // Mensagens especiais para combos
+  let message = getEncouragingMessage() + ` +1 ⭐`;
+  if (streak === 3) message = '🔥 3 seguidas! Você está pegando fogo!';
+  else if (streak === 5) message = '⚡ 5 seguidas! Incrível!';
+  else if (streak === 10) message = '💫 10 seguidas! FENOMENAL!';
+  
+  setMessage(message, 'win');
   updateHighScore();
   checkAchievements();
   
