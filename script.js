@@ -421,7 +421,7 @@ function setMode(mode) {
     el.configHelp.innerHTML = 'Separe por quebra de linha. Ex.: <code>O gato mia</code>, <code>A lua brilha</code>';
   }
   
-  // Reiniciar estado
+  el.nextBtn.textContent = gameMode === 'syllables' ? 'Próxima palavra ➜' : 'Próxima frase ➜';
   streak = 0;
   sessionWords = 0;
   buildDeck();
