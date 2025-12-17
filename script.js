@@ -14,6 +14,7 @@ const el = {
   loadBtn: document.getElementById('loadBtn'),
   shuffleBtn: document.getElementById('shuffleBtn'),
   resetBtn: document.getElementById('resetBtn'),
+  resetRecordBtn: document.getElementById('resetRecordBtn'),
   streakDisplay: document.getElementById('streakDisplay'),
   highScore: document.getElementById('highScore'),
   progressFill: document.getElementById('progressFill'),
@@ -44,18 +45,21 @@ let sessionWords = 0; // palavras da sessão atual
 let level = 1; // nível atual
 
 // Mascotes que mudam com o nível
-const mascots = ['🐱', '🦉', '🐶', '🐼', '🦁', '🦄', '🐉', '👑'];
+const mascots = ['🐶', '🐱', '🐷', '🐘', '🐬', '🐙', '🦉', '🐉', '🦄', '👑'];
+
+
 
 el.highScore.textContent = high;
 
 el.speakBtn.style.display = 'none'; // esconder botão de ouvir inicialmente
 
-// Calcular nível baseado em palavras totais
+// Calcular nível baseado em palavras totais (a cada 4 palavras)
 function calculateLevel() {
-  level = Math.floor(totalWords / 10) + 1;
-  if (level > mascots.length) level = mascots.length;
+  level = Math.floor(totalWords / 4) + 1;
+  // Ciclar mascotes se passar do limite
+  const mascotIndex = (level - 1) % mascots.length;
   el.levelDisplay.textContent = level;
-  el.mascot.textContent = mascots[level - 1];
+  el.mascot.textContent = mascots[mascotIndex];
 }
 
 // ---------------------- Utilidades ----------------------
@@ -176,9 +180,12 @@ function celebrate() {
 }
 
 function updateProgress() {
-  const percentage = (sessionWords / 20) * 100; // meta de 20 palavras
-  el.progressFill.style.width = Math.min(percentage, 100) + '%';
-  el.progressText.textContent = `${sessionWords} ${gameMode === 'phrases' ? 'frases' : 'palavras'}`;
+  // Progresso dentro do nível atual (0 a 4)
+  const currentProgress = totalWords % 4;
+  const percentage = (currentProgress / 4) * 100;
+  
+  el.progressFill.style.width = percentage + '%';
+  el.progressText.textContent = `${currentProgress} / 4`;
 }
 
 function showAchievement(icon, text) {
@@ -191,16 +198,13 @@ function showAchievement(icon, text) {
 }
 
 function checkAchievements() {
+  // Conquistas baseadas em números totais
   if (totalWords === 5) {
-    showAchievement('🌟', 'Primeira Conquista!<br/>5 palavras lidas!');
-  } else if (totalWords === 10) {
-    showAchievement('🏆', 'Incrível!<br/>10 palavras lidas!');
+    showAchievement('🌟', 'Primeira Conquista!<br/>5 acertos!');
   } else if (totalWords === 20) {
-    showAchievement('💎', 'Brilhante!<br/>20 palavras lidas!');
+    showAchievement('🏆', 'Incrível!<br/>20 acertos!');
   } else if (totalWords === 50) {
-    showAchievement('👑', 'Campeão de Leitura!<br/>50 palavras lidas!');
-  } else if (totalWords === 100) {
-    showAchievement('🎓', 'Mestre da Leitura!<br/>100 palavras lidas!');
+    showAchievement('👑', 'Campeão de Leitura!<br/>50 acertos!');
   }
   
   // Verificar mudança de nível
@@ -210,6 +214,7 @@ function checkAchievements() {
     showAchievement('🎊', `Subiu para o Nível ${level}!`);
     el.mascot.classList.add('excited');
     setTimeout(() => el.mascot.classList.remove('excited'), 800);
+    playEncouragement();
   }
 }
 
@@ -295,6 +300,12 @@ function updateHighScore() {
 
 // ---------------------- Ações dos botões ----------------------
 el.helpBtn.addEventListener('click', () => {
+  // Se clicar em ajuda, zera a sequência imediatamente
+  if (!usedHelp) {
+     streak = 0;
+     renderStreak(0);
+  }
+
   // alterna exibição
   if (!usedHelp && el.helpBtn.textContent.startsWith('Mostrar')) {
     usedHelp = true; // marcar que houve ajuda nesta palavra
@@ -353,11 +364,15 @@ el.correctBtn.addEventListener('click', () => {
 });
 
 el.nextBtn.addEventListener('click', () => {
+  // Se pular, zera a sequência
+  streak = 0;
+  renderStreak(0);
+  
   // avançar sem pontuar
-  if (usedHelp && streak > 0) {
+  if (usedHelp) {
     setMessage('Sem estrela nesta, pois a ajuda foi usada. Você consegue na próxima!');
   } else {
-    setMessage('');
+    setMessage('Sequência zerada ao pular.');
   }
   loadNewWord();
 });
@@ -371,12 +386,30 @@ el.shuffleBtn.addEventListener('click', () => {
 el.resetBtn.addEventListener('click', () => {
   streak = 0;
   renderStreak(0);
-  high = 0;
-  el.highScore.textContent = '0';
-  sessionStorage.removeItem('readingStarsHighScore');
   sessionWords = 0;
   updateProgress();
   setMessage('Pontuações da sessão zeradas.');
+});
+
+el.resetRecordBtn.addEventListener('click', () => {
+  if (confirm('Tem certeza? Isso zerará TUDO: nível, recorde e sequência.')) {
+    // Resetar tudo
+    high = 0;
+    streak = 0;
+    level = 1;
+    totalWords = 0;
+    sessionWords = 0;
+    sessionStorage.removeItem('readingStarsHighScore');
+    localStorage.removeItem('readingTotalWords');
+    
+    // Atualizar UI
+    el.highScore.textContent = '0';
+    renderStreak(0);
+    calculateLevel();
+    updateProgress();
+    
+    setMessage('Tudo zerado! Começando do zero! 🔥', 'warn');
+  }
 });
 
 el.loadBtn.addEventListener('click', () => {
@@ -509,14 +542,30 @@ async function initGame() {
 initGame();
 
 // Interação com mascote
+const encouragements = [
+  { text: 'Você está indo muito bem! 🎉', audio: 'audio/Você está indo muito bem.mp3' },
+  { text: 'Eu acredito em você! ⭐', audio: 'audio/Eu acredito em você.mp3' },
+  { text: 'Vamos ler mais uma? 📚', audio: 'audio/Vamos ler mais uma.mp3' },
+  { text: 'Você é incrível! 🌟', audio: 'audio/Você é incrível.mp3' },
+  { text: 'Cada tentativa te deixa mais forte! 🚀', audio: 'audio/Cada tentativa te deixa mais forte.mp3' },
+  { text: 'Que orgulho de você! 😄', audio: 'audio/Que orgulho de você.mp3' },
+  { text: 'Você aprende rápido demais! 🧠', audio: 'audio/Você aprende rápido demais.mp3' },
+  { text: 'Aprender com você é divertido! 😊', audio: 'audio/Aprender com você é divertido.mp3' }
+];
+
+function playEncouragement() {
+  const item = encouragements[Math.floor(Math.random() * encouragements.length)];
+  setMessage(item.text, 'win');
+  try {
+    const audio = new Audio(item.audio);
+    audio.play().catch(e => console.warn('Autoplay prevented or audio missing:', e));
+  } catch(e) {
+    console.warn('Audio error:', e);
+  }
+}
+
+// Interação com mascote
 el.mascot.addEventListener('click', () => {
   animateMascot('excited');
-  const encouragements = [
-    'Você está indo muito bem! 🎉',
-    'Continue assim, campeão! 💪',
-    'Eu acredito em você! ⭐',
-    'Vamos ler mais uma? 📚',
-    'Você é incrível! 🌟'
-  ];
-  setMessage(encouragements[Math.floor(Math.random() * encouragements.length)], 'win');
+  playEncouragement();
 });
