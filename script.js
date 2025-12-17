@@ -26,7 +26,9 @@ const el = {
   modeSyllablesBtn: document.getElementById('modeSyllablesBtn'),
   modePhrasesBtn: document.getElementById('modePhrasesBtn'),
   changeModeBtn: document.getElementById('changeModeBtn'),
-  streakDisplay: document.getElementById('streakDisplay')
+  streakDisplay: document.getElementById('streakDisplay'),
+  configSummary: document.getElementById('configSummary'),
+  configHelp: document.getElementById('configHelp')
 };
 
 // Estado do jogo
@@ -380,15 +382,27 @@ el.resetBtn.addEventListener('click', () => {
 el.loadBtn.addEventListener('click', () => {
   const raw = el.wordsInput.value.trim();
   const parts = raw.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
-  const onlyValid = parts.filter(w => /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/.test(w));
-  if (!onlyValid.length) {
-    setMessage('Nenhuma palavra válida encontrada. Use hífens para separar sílabas (ex.: ca-sa).', 'danger');
-    return;
+  
+  let onlyValid;
+  if (gameMode === 'syllables') {
+    onlyValid = parts.filter(w => /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/.test(w));
+    if (!onlyValid.length) {
+      setMessage('Nenhuma palavra válida encontrada. Use hífens para separar sílabas (ex.: ca-sa).', 'danger');
+      return;
+    }
+  } else {
+    // No modo frases, aceita qualquer texto não vazio
+    onlyValid = parts.filter(w => w.length > 0);
+    if (!onlyValid.length) {
+      setMessage('Nenhuma frase válida encontrada. Digite pelo menos uma frase.', 'danger');
+      return;
+    }
   }
+  
   words = onlyValid;
   buildDeck();
   loadNewWord();
-  setMessage(`Carregado ${words.length} palavra(s).`, 'muted');
+  setMessage(`Carregado ${words.length} ${gameMode === 'phrases' ? 'frase(s)' : 'palavra(s)'}.`, 'muted');
 });
 
 // ---------------------- Controle de Modos ----------------------
@@ -397,8 +411,14 @@ function setMode(mode) {
   gameMode = mode;
   if (mode === 'syllables') {
     words = [...dbSyllables];
+    el.wordsInput.value = dbSyllables.join(', ');
+    el.configSummary.textContent = 'Carregar/editar lista de palavras (sílabas separadas por "-")';
+    el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>ca-sa</code>, <code>ho-ra</code>, <code>so-fá</code>';
   } else {
     words = [...dbPhrases];
+    el.wordsInput.value = dbPhrases.join('\n');
+    el.configSummary.textContent = 'Carregar/editar lista de frases';
+    el.configHelp.innerHTML = 'Separe por quebra de linha. Ex.: <code>O gato mia</code>, <code>A lua brilha</code>';
   }
   
   // Reiniciar estado
