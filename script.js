@@ -1,71 +1,7 @@
-// ---------------------- Configuração inicial ----------------------
-const defaultWords = [
-  // Palavras simples (2 sílabas)
-  "ca-sa", "bo-la", "ga-to", "pa-to", "sa-po", "la-ta", "ca-ma", "me-sa",
-  "po-vo", "ru-a", "lu-a", "so-fá", "ca-fé", "pé", "mão", "sol",
-  "flor", "mar", "céu", "pão", "luz", "paz", "sal", "mel",
-
-  // Palavras com 2 sílabas
-  "li-vro", "por-ta", "ca-rro", "fer-ro", "ter-ra", "guer-ra", "pe-dra", "vi-dro",
-  "qua-dro", "le-bre", "ti-gre", "ze-bra", "co-bra", "ca-bra", "o-lho", "fi-lho",
-  "ga-lho", "mi-lho", "cha-vé", "cha-péu", "pa-pel", "pas-tel", "jar-dim", "tam-bém",
-
-  // Palavras com 3 sílabas
-  "ja-ne-la", "ca-dei-ra", "ma-dei-ra", "ban-dei-ra", "la-ran-ja", "co-ber-tor",
-  "es-co-la", "pro-fes-sor", "ca-der-no", "lá-pis", "bor-ra-cha", "te-sou-ra",
-  "co-mi-da", "be-bi-da", "fa-mi-lia", "a-mi-go", "me-ni-no", "me-ni-na",
-  "bon-e-ca", "car-rin-ho", "bi-ci-cle-ta", "pa-ti-ne-te", "ba-lan-ço", "es-cor-re-ga",
-
-  // Animais
-  "ca-va-lo", "va-ca", "por-co", "o-ve-lha", "ga-li-nha", "pin-to", "co-e-lho",
-  "ca-chor-ro", "lei-ão", "ma-ca-co", "e-le-fan-te", "gi-ra-fa", "hip-pó-po-ta-mo",
-  "bor-bo-le-ta", "a-be-lha", "for-mi-ga", "jo-a-nha", "grilo", "ci-gar-ra",
-  "pei-xe", "tu-ba-rão", "ba-lei-a", "gol-fi-nho", "tar-ta-ru-ga", "ja-ca-ré",
-  "pás-sa-ro", "pa-pa-gai-o", "co-ru-ja", "á-gui-a", "gali-nha", "per-u",
-
-  // Frutas
-  "ma-çã", "ba-na-na", "u-va", "la-ran-ja", "li-mão", "ma-ra-cu-já", "a-ba-ca-xi",
-  "me-lan-cia", "mo-ran-go", "pês-se-go", "a-me-ixa", "ce-re-ja", "cô-co", "man-ga",
-  "ma-mão", "ki-wi", "pe-ra", "fi-go", "ca-qui", "go-ia-ba",
-
-  // Alimentos
-  "ar-roz", "fei-jão", "ma-car-rão", "ba-ta-ta", "ce-nou-ra", "to-ma-te", "a-lfa-ce",
-  "bró-co-lis", "co-u-ve", "a-bo-brin-ha", "be-rin-je-la", "pi-men-tão", "ce-bo-la",
-  "al-ho", "lei-te", "quei-jo", "man-tei-ga", "i-o-gur-te", "o-vo", "car-ne",
-  "fran-go", "pei-xe", "bis-coi-to", "bo-lo", "do-ce", "so-cor-ve-te", "su-co",
-
-  // Corpo humano
-  "ca-be-ça", "ca-be-lo", "o-re-lha", "o-lho", "na-riz", "bo-ca", "den-te",
-  "lín-gua", "pes-co-ço", "om-bro", "bra-ço", "mão", "de-do", "un-ha",
-  "bar-ri-ga", "cos-tas", "per-na", "joe-lho", "pé", "co-ra-ção", "pul-mão",
-
-  // Roupas
-  "ca-mi-sa", "cal-ça", "short", "sa-ia", "ves-ti-do", "blu-sa", "ca-sa-co",
-  "ja-que-ta", "sa-pa-to", "tê-nis", "mei-a", "lu-va", "go-rro", "cha-péu",
-  "ci-nto", "gra-va-ta", "len-ço", "e-char-pe", "pi-ja-ma", "cal-ci-nha",
-
-  // Objetos da casa
-  "co-zi-nha", "sa-la", "quar-to", "ba-nhei-ro", "te-lha-do", "pa-re-de", "pi-so",
-  "te-to", "es-ca-da", "jar-dim", "quin-tal", "por-tão", "cam-pai-nha",
-  "so-fá", "pol-tro-na", "te-le-vi-são", "rá-di-o", "com-pu-ta-dor", "te-le-fo-ne",
-  "ge-la-dei-ra", "fo-gão", "mi-cro-on-das", "li-qui-di-fi-ca-dor", "ba-te-dei-ra",
-  "co-po", "pra-to", "ta-lher", "gar-fo", "fa-ca", "col-her", "xi-ca-ra",
-  "pa-ne-la", "fri-gi-dei-ra", "cha-lei-ra", "ga-rra-fa", "jar-ra", "ban-de-ja",
-
-  // Natureza
-  "ár-vo-re", "fo-lha", "ga-lho", "raiz", "tron-co", "fru-to", "se-men-te",
-  "gra-ma", "flo-res-ta", "mon-ta-nha", "rio", "la-go", "ca-cho-ei-ra", "pra-ia",
-  "nu-vem", "chu-va", "ven-to", "tro-vão", "re-lâm-pa-go", "ar-co-í-ris",
-  "es-tre-la", "pla-ne-ta", "ter-ra", "pe-dra", "a-rei-a", "bar-ro",
-
-  // Cores
-  "ver-me-lho", "a-zul", "a-ma-re-lo", "ver-de", "la-ran-ja", "ro-xo", "ro-sa",
-  "mar-rom", "pre-to", "bran-co", "cin-za", "dou-ra-do", "pra-te-a-do",
-
-  // Ações simples
-  "cor-rer", "pu-lar", "dan-çar", "can-tar", "brin-car", "es-tu-dar", "ler",
-  "es-cre-ver", "de-se-nhar", "pin-tar", "dor-mir", "a-cor-dar", "co-mer", "be-ber"
-];
+// Dados carregados dos JSONs
+let dbSyllables = [];
+let dbPhrases = [];
+let gameMode = 'syllables'; // 'syllables' | 'phrases'
 
 const el = {
   word: document.getElementById('word'),
@@ -78,18 +14,23 @@ const el = {
   loadBtn: document.getElementById('loadBtn'),
   shuffleBtn: document.getElementById('shuffleBtn'),
   resetBtn: document.getElementById('resetBtn'),
-  streakStars: document.getElementById('streakStars'),
+  streakDisplay: document.getElementById('streakDisplay'),
   highScore: document.getElementById('highScore'),
   progressFill: document.getElementById('progressFill'),
   progressText: document.getElementById('progressText'),
   mascot: document.getElementById('mascot'),
   achievementPopup: document.getElementById('achievementPopup'),
   levelDisplay: document.getElementById('levelDisplay'),
-  wordDifficulty: document.getElementById('wordDifficulty')
+  wordDifficulty: document.getElementById('wordDifficulty'),
+  modeSelection: document.getElementById('modeSelection'),
+  modeSyllablesBtn: document.getElementById('modeSyllablesBtn'),
+  modePhrasesBtn: document.getElementById('modePhrasesBtn'),
+  changeModeBtn: document.getElementById('changeModeBtn'),
+  streakDisplay: document.getElementById('streakDisplay')
 };
 
 // Estado do jogo
-let words = [...defaultWords]; // sempre no formato com hífen
+let words = []; // sempre no formato com hífen
 let deck = []; // índices embaralhados
 let idx = -1; // índice atual no deck
 let usedHelp = false; // se clicou ajuda na palavra atual
@@ -101,10 +42,10 @@ let sessionWords = 0; // palavras da sessão atual
 let level = 1; // nível atual
 
 // Mascotes que mudam com o nível
-const mascots = ['🦉', '🐱', '🐶', '🐼', '🦁', '🦄', '🐉', '👑'];
+const mascots = ['🐱', '🦉', '🐶', '🐼', '🦁', '🦄', '🐉', '👑'];
 
 el.highScore.textContent = high;
-el.wordsInput.value = defaultWords.join(', ');
+
 el.speakBtn.style.display = 'none'; // esconder botão de ouvir inicialmente
 
 // Calcular nível baseado em palavras totais
@@ -138,14 +79,27 @@ function nextFromDeck() {
   return words[deck[idx]];
 }
 
-function stripHyphens(hyphenated) {
-  return hyphenated.replace(/\s+/g, '').replace(/-/g, '');
+function stripHyphens(text) {
+  if (gameMode === 'phrases') return text;
+  return text.replace(/\s+/g, '').replace(/-/g, '');
 }
 
-function renderWord(hyphenated, showSyllables) {
-  const parts = hyphenated.split('-');
-  if (showSyllables) {
-    el.word.innerHTML = parts.map((p, i) => `<button class="syllable-btn" data-index="${i}">${p}</button>`).join('<span class="syllable" style="opacity:.5">-</span>');
+function renderWord(text, showParts) {
+  let parts;
+  let separator;
+  
+  if (gameMode === 'phrases') {
+    parts = text.split(' ');
+    separator = '<span class="syllable" style="opacity:0"> </span>'; // espaço visível
+  } else {
+    parts = text.split('-');
+    separator = '<span class="syllable" style="opacity:.5">-</span>';
+  }
+
+  if (showParts) {
+    el.helpBtn.textContent = gameMode === 'phrases' ? 'Esconder palavras' : 'Esconder sílabas';
+    el.word.innerHTML = parts.map((p, i) => `<button class="syllable-btn" data-index="${i}">${p}</button>`).join(separator);
+    
     // adicionar listeners após DOM update
     setTimeout(() => {
       document.querySelectorAll('.syllable-btn').forEach(btn => {
@@ -153,13 +107,15 @@ function renderWord(hyphenated, showSyllables) {
       });
     }, 0);
   } else {
-    el.word.textContent = stripHyphens(hyphenated);
+    el.helpBtn.textContent = gameMode === 'phrases' ? 'Separar palavras' : 'Mostrar sílabas';
+    el.word.textContent = stripHyphens(text);
   }
 }
 
 function handleSyllableClick(e) {
   const index = parseInt(e.target.dataset.index);
-  const parts = words[deck[idx]].split('-');
+  const text = words[deck[idx]];
+  const parts = gameMode === 'phrases' ? text.split(' ') : text.split('-');
   const syllable = parts[index];
   
   // Adicionar animação
@@ -189,11 +145,13 @@ function setMessage(msg = '', kind = 'muted') {
   else el.message.style.color = 'var(--muted)';
 }
 
-function renderStars(n) {
-  const starsHtml = n > 0 ? Array.from({length: n}, (_, i) => 
-    `<span class="star ${i === n-1 ? 'star-grow' : ''}">⭐</span>`
-  ).join('') : '—';
-  el.streakStars.innerHTML = starsHtml;
+function renderStreak(n) {
+  el.streakDisplay.textContent = n;
+  if (n > 0) {
+    el.streakDisplay.classList.remove('pulse');
+    void el.streakDisplay.offsetWidth;
+    el.streakDisplay.classList.add('pulse'); // Reuse existing pulse animation
+  }
 }
 
 function celebrate() {
@@ -218,7 +176,7 @@ function celebrate() {
 function updateProgress() {
   const percentage = (sessionWords / 20) * 100; // meta de 20 palavras
   el.progressFill.style.width = Math.min(percentage, 100) + '%';
-  el.progressText.textContent = `${sessionWords} ${sessionWords === 1 ? 'palavra' : 'palavras'}`;
+  el.progressText.textContent = `${sessionWords} ${gameMode === 'phrases' ? 'frases' : 'palavras'}`;
 }
 
 function showAchievement(icon, text) {
@@ -295,12 +253,19 @@ function getEncouragingMessage() {
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
-function getWordDifficulty(hyphenatedWord) {
-  const syllables = hyphenatedWord.split('-').length;
-  if (syllables === 1) return { text: '📖 Muito Fácil', color: '#22c55e' };
-  if (syllables === 2) return { text: '📗 Fácil', color: '#3b82f6' };
-  if (syllables === 3) return { text: '📘 Médio', color: '#f59e0b' };
-  return { text: '📕 Desafio', color: '#ef4444' };
+function getWordDifficulty(text) {
+  const count = gameMode === 'phrases' ? text.split(' ').length : text.split('-').length;
+  
+  if (gameMode === 'phrases') {
+     if (count <= 3) return { text: '📖 Frase Curta', color: '#22c55e' };
+     if (count <= 5) return { text: '📗 Frase Média', color: '#3b82f6' };
+     return { text: '📕 Frase Longa', color: '#ef4444' };
+  } else {
+     if (count === 1) return { text: '📖 Muito Fácil', color: '#22c55e' };
+     if (count === 2) return { text: '📗 Fácil', color: '#3b82f6' };
+     if (count === 3) return { text: '📘 Médio', color: '#f59e0b' };
+     return { text: '📕 Desafio', color: '#ef4444' };
+  }
 }
 
 function loadNewWord() {
@@ -309,7 +274,6 @@ function loadNewWord() {
   syllablesClicked.clear();
   el.speakBtn.style.display = 'none';
   renderWord(w, false);
-  el.helpBtn.textContent = 'Mostrar sílabas';
   setMessage('');
   
   // Mostrar dificuldade
@@ -344,14 +308,14 @@ el.helpBtn.addEventListener('click', () => {
     usedHelp = true;
     renderWord(words[deck[idx]], true);
     el.helpBtn.textContent = 'Esconder sílabas';
-    setMessage('Ajuda ativada: esta palavra não vale estrela.', 'warn');
+    setMessage('Ajuda ativada: este item não vale estrela.', 'warn');
   }
 });
 
 el.correctBtn.addEventListener('click', () => {
   if (usedHelp) {
     streak = 0;
-    renderStars(streak);
+    renderStreak(streak);
     setMessage('Boa! Tente ler a próxima sem ajuda para ganhar estrelas. ✨', 'muted');
     setTimeout(loadNewWord, 650);
     return;
@@ -370,7 +334,7 @@ el.correctBtn.addEventListener('click', () => {
   playSuccessSound();
   
   // Atualizar UI
-  renderStars(streak);
+  renderStreak(streak);
   updateProgress();
   
   // Mensagens especiais para combos
@@ -404,7 +368,7 @@ el.shuffleBtn.addEventListener('click', () => {
 
 el.resetBtn.addEventListener('click', () => {
   streak = 0;
-  renderStars(0);
+  renderStreak(0);
   high = 0;
   el.highScore.textContent = '0';
   sessionStorage.removeItem('readingStarsHighScore');
@@ -425,6 +389,34 @@ el.loadBtn.addEventListener('click', () => {
   buildDeck();
   loadNewWord();
   setMessage(`Carregado ${words.length} palavra(s).`, 'muted');
+});
+
+// ---------------------- Controle de Modos ----------------------
+
+function setMode(mode) {
+  gameMode = mode;
+  if (mode === 'syllables') {
+    words = [...dbSyllables];
+  } else {
+    words = [...dbPhrases];
+  }
+  
+  // Reiniciar estado
+  streak = 0;
+  sessionWords = 0;
+  buildDeck();
+  loadNewWord();
+  renderStreak(0);
+  updateProgress();
+  
+  el.modeSelection.classList.add('hidden');
+}
+
+el.modeSyllablesBtn.addEventListener('click', () => setMode('syllables'));
+el.modePhrasesBtn.addEventListener('click', () => setMode('phrases'));
+
+el.changeModeBtn.addEventListener('click', () => {
+  el.modeSelection.classList.remove('hidden');
 });
 
 // Ouvir palavra (Web Speech API)
@@ -472,11 +464,29 @@ window.addEventListener('keydown', (e) => {
 });
 
 // Inicialização
-buildDeck();
-loadNewWord();
-renderStars(0);
-calculateLevel();
-updateProgress();
+async function initGame() {
+  try {
+    const [resWords, resPhrases] = await Promise.all([
+      fetch('words.json'),
+      fetch('phrases.json')
+    ]);
+
+    if (!resWords.ok || !resPhrases.ok) throw new Error('Erro ao carregar dados');
+
+    dbSyllables = await resWords.json();
+    dbPhrases = await resPhrases.json();
+    
+    // Inicia sem carregar jogo, espera seleção
+    el.wordsInput.value = dbSyllables.join(', '); // apenas para facilitar edição do modo padrão
+    
+  } catch (error) {
+    console.error(error);
+    setMessage('Erro ao carregar dados: ' + error.message, 'danger');
+  }
+}
+
+// Inicialização
+initGame();
 
 // Interação com mascote
 el.mascot.addEventListener('click', () => {

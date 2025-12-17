@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Leitura por Sílabas – Estrelinhas ⭐</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <div class="app">
     <header>
       <div class="brand">
         <div class="logo" aria-hidden="true"><span>🔤</span></div>
         <h1>Leitura por Sílabas</h1>
+        <button id="changeModeBtn" class="btn-ghost btn-sm" title="Mudar modo de jogo">🔄 Trocar</button>
       </div>
       <div class="stats">
         <div class="stat" title="Nível atual">
@@ -20,7 +23,7 @@
         </div>
         <div class="stat" title="Sequência atual">
           <span>Sequência</span>
-          <div id="streakStars" class="stars" aria-live="polite"></div>
+          <b id="streakDisplay">0</b><span class="star">🔥</span>
         </div>
         <div class="stat" title="Recorde desta sessão">
           <span>Recorde</span>
@@ -39,7 +42,7 @@
           <div id="progressFill" class="progress-fill"></div>
         </div>
       </div>
-      <div id="mascot" class="mascot">🦉</div>
+      <div id="mascot" class="mascot">🐱</div>
       <div id="wordDifficulty" class="word-difficulty">📖 Fácil</div>
       <div id="word" class="word" aria-label="Palavra atual">—</div>
       <div class="toolbar">
@@ -56,7 +59,9 @@
 
     <details class="config">
       <summary>Carregar/editar lista de palavras (sílabas separadas por "-")</summary>
-      <p style="margin:10px 0 6px;color:var(--muted)">Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>ca-sa</code>, <code>ho-ra</code>, <code>so-fá</code></p>
+      <p style="margin:10px 0 6px;color:var(--muted)">Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.:
+        <code>ca-sa</code>, <code>ho-ra</code>, <code>so-fá</code>
+      </p>
       <textarea id="wordsInput"></textarea>
       <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap">
         <button id="loadBtn" class="btn-primary">Usar lista</button>
@@ -70,6 +75,29 @@
     </footer>
   </div>
 
+  <div id="modeSelection" class="mode-overlay">
+    <div class="mode-card">
+      <h2>O que vamos ler hoje?</h2>
+      <div class="mode-buttons">
+        <button id="modeSyllablesBtn" class="mode-btn">
+          <span class="mode-icon">🦉</span>
+          <span class="mode-text">
+            <strong>Palavras</strong>
+            <small>Separadas por sílabas</small>
+          </span>
+        </button>
+        <button id="modePhrasesBtn" class="mode-btn">
+          <span class="mode-icon">📚</span>
+          <span class="mode-text">
+            <strong>Frases</strong>
+            <small>Pequenas sentenças</small>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
+
 </html>
