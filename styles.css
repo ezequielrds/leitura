@@ -679,3 +679,11 @@ footer {
   border-radius: 10px;
   margin-left: 10px
 }
+
+/* Case Toggle */
+.uppercase-mode .word,
+.uppercase-mode .syllable-btn,
+.uppercase-mode .message,
+.uppercase-mode .word-difficulty {
+  text-transform: uppercase;
+}

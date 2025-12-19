@@ -27,6 +27,7 @@ const el = {
   modeSyllablesBtn: document.getElementById('modeSyllablesBtn'),
   modePhrasesBtn: document.getElementById('modePhrasesBtn'),
   changeModeBtn: document.getElementById('changeModeBtn'),
+  toggleCaseBtn: document.getElementById('toggleCaseBtn'),
   streakDisplay: document.getElementById('streakDisplay'),
   configSummary: document.getElementById('configSummary'),
   configHelp: document.getElementById('configHelp')
@@ -439,6 +440,13 @@ el.loadBtn.addEventListener('click', () => {
 });
 
 // ---------------------- Controle de Modos ----------------------
+
+// Iniciar em maiúsculas por padrão
+document.body.classList.add('uppercase-mode');
+
+el.toggleCaseBtn.addEventListener('click', () => {
+  document.body.classList.toggle('uppercase-mode');
+});
 
 function setMode(mode) {
   gameMode = mode;
