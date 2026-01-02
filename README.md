@@ -4,27 +4,38 @@ Aplicativo educacional interativo para auxiliar crianças no aprendizado de leit
 
 ## 🌐 Ver o Aplicativo Online
 
-### 🚀 Opção 1: Preview Imediato (Funciona Agora!)
+### 🚀 Link Principal (Branch Main)
 
-Você pode visualizar o aplicativo imediatamente sem configuração usando o HTMLPreview:
+**URL Oficial:** https://ezequielrds.github.io/leitura/
 
-**👉 [CLIQUE AQUI PARA VER O PREVIEW](https://htmlpreview.github.io/?https://github.com/ezequielrds/leitura/blob/copilot/add-github-pages-branch/index.html)**
+Este é o link principal que sempre reflete o conteúdo da branch `main`.
 
-Este link funciona imediatamente e não requer nenhuma configuração!
+### 🔍 Preview Automático de Branches
 
-> **Nota:** O HTMLPreview pode ter algumas limitações com áudio. Para melhor experiência, use a Opção 2 abaixo.
+Cada branch automaticamente gera seu próprio preview! O link segue o padrão:
 
-### 📌 Opção 2: GitHub Pages Oficial
+**`https://ezequielrds.github.io/leitura/preview/[NOME-DA-BRANCH]/`**
 
-**Link para GitHub Pages:** https://ezequielrds.github.io/leitura/
+**Exemplos:**
+- Branch `copilot/add-github-pages-branch`: 
+  - https://ezequielrds.github.io/leitura/preview/copilot-add-github-pages-branch/
+- Branch `feature/nova-funcionalidade`:
+  - https://ezequielrds.github.io/leitura/preview/feature-nova-funcionalidade/
 
-Para ativar este link, siga os passos abaixo:
-1. Vá em **Settings** → **Pages** do repositório
-2. Em **Source**, selecione **Deploy from a branch**
-3. Em **Branch**, selecione **gh-pages** e **/root**
-4. Clique em **Save**
+### ⚙️ Como Funciona
 
-O workflow já está configurado para criar o branch `gh-pages` automaticamente quando você fizer push.
+1. **Primeira vez:** Configure GitHub Pages uma vez:
+   - Vá em **Settings** → **Pages**
+   - Em **Source**, selecione **Deploy from a branch**
+   - Em **Branch**, selecione **gh-pages** e **/root**
+   - Clique em **Save**
+
+2. **Automático:** Depois disso, cada push em qualquer branch:
+   - Cria automaticamente um preview em `/preview/[branch-name]/`
+   - O link fica disponível em 1-2 minutos
+   - Você pode verificar o status na aba **Actions** do GitHub
+
+3. **Branch Main:** Sempre publica no link principal (raiz do site)
 
 ## 📋 Funcionalidades
 
