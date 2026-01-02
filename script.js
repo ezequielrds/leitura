@@ -2,11 +2,13 @@
 let dbSyllables = [];
 let dbPhrases = [];
 let dbLetters = [];
-let gameMode = 'syllables'; // 'syllables' | 'phrases' | 'letters'
+let gameMode = 'syllables'; // 'syllables' | 'phrases' | 'letters' | 'numbers'
+let numbersRange = { min: 0, max: 10 }; // range para números
 
 // Regex patterns for validation
 const SYLLABLE_PATTERN = /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/;
 const LETTER_PATTERN = /^[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]$/;
+const NUMBER_PATTERN = /^-?\d+$/;
 
 const el = {
   word: document.getElementById('word'),
@@ -32,6 +34,14 @@ const el = {
   modeSyllablesBtn: document.getElementById('modeSyllablesBtn'),
   modePhrasesBtn: document.getElementById('modePhrasesBtn'),
   modeLettersBtn: document.getElementById('modeLettersBtn'),
+  modeNumbersBtn: document.getElementById('modeNumbersBtn'),
+  numbersConfig: document.getElementById('numbersConfig'),
+  minNumber: document.getElementById('minNumber'),
+  maxNumber: document.getElementById('maxNumber'),
+  minNumberValue: document.getElementById('minNumberValue'),
+  maxNumberValue: document.getElementById('maxNumberValue'),
+  confirmNumbersBtn: document.getElementById('confirmNumbersBtn'),
+  cancelNumbersBtn: document.getElementById('cancelNumbersBtn'),
   changeModeBtn: document.getElementById('changeModeBtn'),
   toggleCaseBtn: document.getElementById('toggleCaseBtn'),
   streakDisplay: document.getElementById('streakDisplay'),
@@ -93,7 +103,7 @@ function nextFromDeck() {
 }
 
 function stripHyphens(text) {
-  if (gameMode === 'phrases' || gameMode === 'letters') return text;
+  if (gameMode === 'phrases' || gameMode === 'letters' || gameMode === 'numbers') return text;
   return text.replace(/\s+/g, '').replace(/-/g, '');
 }
 
@@ -107,6 +117,9 @@ function renderWord(text, showParts) {
   } else if (gameMode === 'letters') {
     parts = [text]; // letra única
     separator = '';
+  } else if (gameMode === 'numbers') {
+    parts = [text]; // número único
+    separator = '';
   } else {
     parts = text.split('-');
     separator = '<span class="syllable" style="opacity:.5">-</span>';
@@ -114,6 +127,8 @@ function renderWord(text, showParts) {
 
   if (showParts) {
     if (gameMode === 'letters') {
+      el.helpBtn.textContent = 'Esconder ajuda';
+    } else if (gameMode === 'numbers') {
       el.helpBtn.textContent = 'Esconder ajuda';
     } else {
       el.helpBtn.textContent = gameMode === 'phrases' ? 'Esconder palavras' : 'Esconder sílabas';
@@ -129,6 +144,8 @@ function renderWord(text, showParts) {
   } else {
     if (gameMode === 'letters') {
       el.helpBtn.textContent = 'Ouvir letra';
+    } else if (gameMode === 'numbers') {
+      el.helpBtn.textContent = 'Ouvir número';
     } else {
       el.helpBtn.textContent = gameMode === 'phrases' ? 'Separar palavras' : 'Mostrar sílabas';
     }
@@ -147,6 +164,8 @@ function handleSyllableClick(e) {
     syllable = parts[index];
   } else if (gameMode === 'letters') {
     syllable = text; // letra única
+  } else if (gameMode === 'numbers') {
+    syllable = text; // número único
   } else {
     parts = text.split('-');
     syllable = parts[index];
@@ -167,8 +186,8 @@ function handleSyllableClick(e) {
   speechSynthesis.speak(u);
   syllablesClicked.add(index);
   
-  if (gameMode === 'letters') {
-    // Para letras, mostrar botão de ouvir imediatamente
+  if (gameMode === 'letters' || gameMode === 'numbers') {
+    // Para letras e números, mostrar botão de ouvir imediatamente
     el.speakBtn.style.display = 'inline-block';
   } else {
     // Reuse parts variable if not already set
@@ -301,6 +320,10 @@ function getEncouragingMessage() {
 function getWordDifficulty(text) {
   if (gameMode === 'letters') {
     return { text: '🔤 Letra', color: '#22c55e' };
+  }
+  
+  if (gameMode === 'numbers') {
+    return { text: '', color: 'transparent' }; // sem dificuldade para números
   }
   
   const count = gameMode === 'phrases' ? text.split(' ').length : text.split('-').length;
@@ -469,6 +492,13 @@ el.loadBtn.addEventListener('click', () => {
       setMessage('Nenhuma letra válida encontrada. Digite apenas letras individuais.', 'danger');
       return;
     }
+  } else if (gameMode === 'numbers') {
+    // No modo números, aceita apenas números inteiros
+    onlyValid = parts.filter(w => NUMBER_PATTERN.test(w));
+    if (!onlyValid.length) {
+      setMessage('Nenhum número válido encontrado. Digite apenas números.', 'danger');
+      return;
+    }
   } else {
     // No modo frases, aceita qualquer texto não vazio
     onlyValid = parts.filter(w => w.length > 0);
@@ -481,7 +511,7 @@ el.loadBtn.addEventListener('click', () => {
   words = onlyValid;
   buildDeck();
   loadNewWord();
-  setMessage(`Carregado ${words.length} ${gameMode === 'phrases' ? 'frase(s)' : gameMode === 'letters' ? 'letra(s)' : 'palavra(s)'}.`, 'muted');
+  setMessage(`Carregado ${words.length} ${gameMode === 'phrases' ? 'frase(s)' : gameMode === 'letters' ? 'letra(s)' : gameMode === 'numbers' ? 'número(s)' : 'palavra(s)'}.`, 'muted');
 });
 
 // ---------------------- Controle de Modos ----------------------
@@ -507,6 +537,16 @@ function setMode(mode) {
     el.configSummary.textContent = 'Carregar/editar lista de letras';
     el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>A</code>, <code>B</code>, <code>C</code>';
     el.nextBtn.textContent = 'Próxima letra ➜';
+  } else if (mode === 'numbers') {
+    // Gerar números baseado no range
+    words = [];
+    for (let i = numbersRange.min; i <= numbersRange.max; i++) {
+      words.push(String(i));
+    }
+    el.wordsInput.value = words.join(', ');
+    el.configSummary.textContent = 'Carregar/editar lista de números';
+    el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>1</code>, <code>2</code>, <code>3</code>';
+    el.nextBtn.textContent = 'Próximo número ➜';
   } else {
     words = [...dbPhrases];
     el.wordsInput.value = dbPhrases.join('\n');
@@ -528,6 +568,45 @@ function setMode(mode) {
 el.modeSyllablesBtn.addEventListener('click', () => setMode('syllables'));
 el.modePhrasesBtn.addEventListener('click', () => setMode('phrases'));
 el.modeLettersBtn.addEventListener('click', () => setMode('letters'));
+
+// Numbers mode: show config modal first
+el.modeNumbersBtn.addEventListener('click', () => {
+  el.modeSelection.classList.add('hidden');
+  el.numbersConfig.classList.remove('hidden');
+});
+
+// Numbers config slider handlers
+el.minNumber.addEventListener('input', (e) => {
+  const value = parseInt(e.target.value);
+  el.minNumberValue.textContent = value;
+  // Ensure max is always >= min
+  if (parseInt(el.maxNumber.value) < value) {
+    el.maxNumber.value = value;
+    el.maxNumberValue.textContent = value;
+  }
+});
+
+el.maxNumber.addEventListener('input', (e) => {
+  const value = parseInt(e.target.value);
+  el.maxNumberValue.textContent = value;
+  // Ensure min is always <= max
+  if (parseInt(el.minNumber.value) > value) {
+    el.minNumber.value = value;
+    el.minNumberValue.textContent = value;
+  }
+});
+
+el.confirmNumbersBtn.addEventListener('click', () => {
+  numbersRange.min = parseInt(el.minNumber.value);
+  numbersRange.max = parseInt(el.maxNumber.value);
+  el.numbersConfig.classList.add('hidden');
+  setMode('numbers');
+});
+
+el.cancelNumbersBtn.addEventListener('click', () => {
+  el.numbersConfig.classList.add('hidden');
+  el.modeSelection.classList.remove('hidden');
+});
 
 el.changeModeBtn.addEventListener('click', () => {
   el.modeSelection.classList.remove('hidden');
