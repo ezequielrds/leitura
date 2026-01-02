@@ -342,20 +342,17 @@ el.helpBtn.addEventListener('click', () => {
   }
 
   // alterna exibição
-  if (!usedHelp && el.helpBtn.textContent.startsWith('Mostrar')) {
+  if (!usedHelp && (el.helpBtn.textContent.startsWith('Mostrar') || el.helpBtn.textContent.startsWith('Ouvir'))) {
     usedHelp = true; // marcar que houve ajuda nesta palavra
     renderWord(words[deck[idx]], true);
-    el.helpBtn.textContent = 'Esconder sílabas';
-    setMessage('Ajuda ativada: esta palavra não vale estrela.', 'warn');
+    setMessage('Ajuda ativada: este item não vale estrela.', 'warn');
   } else if (el.helpBtn.textContent.startsWith('Esconder')) {
     renderWord(words[deck[idx]], false);
-    el.helpBtn.textContent = 'Mostrar sílabas';
     // manter aviso de ajuda
   } else {
     // fallback
     usedHelp = true;
     renderWord(words[deck[idx]], true);
-    el.helpBtn.textContent = 'Esconder sílabas';
     setMessage('Ajuda ativada: este item não vale estrela.', 'warn');
   }
 });
