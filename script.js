@@ -3,7 +3,7 @@ let dbSyllables = [];
 let dbPhrases = [];
 let dbLetters = [];
 let gameMode = 'syllables'; // 'syllables' | 'phrases' | 'letters' | 'numbers'
-let numbersRange = { min: 0, max: 10 }; // range para números
+let numbersRange = { min: 0, max: 10 }; // intervalo para números
 
 // Regex patterns for validation
 const SYLLABLE_PATTERN = /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/;
@@ -317,26 +317,36 @@ function getEncouragingMessage() {
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
+function getItemTypePlural(mode) {
+  const types = {
+    'phrases': 'frase(s)',
+    'letters': 'letra(s)',
+    'numbers': 'número(s)',
+    'syllables': 'palavra(s)'
+  };
+  return types[mode] || 'item(s)';
+}
+
 function getWordDifficulty(text) {
   if (gameMode === 'letters') {
-    return { text: '🔤 Letra', color: '#22c55e' };
+    return { text: '🔤 Letra', color: '#22c55e', hidden: false };
   }
   
   if (gameMode === 'numbers') {
-    return { text: '', color: 'transparent' }; // sem dificuldade para números
+    return { text: '', color: '', hidden: true }; // sem dificuldade para números
   }
   
   const count = gameMode === 'phrases' ? text.split(' ').length : text.split('-').length;
   
   if (gameMode === 'phrases') {
-     if (count <= 3) return { text: '📖 Frase Curta', color: '#22c55e' };
-     if (count <= 5) return { text: '📗 Frase Média', color: '#3b82f6' };
-     return { text: '📕 Frase Longa', color: '#ef4444' };
+     if (count <= 3) return { text: '📖 Frase Curta', color: '#22c55e', hidden: false };
+     if (count <= 5) return { text: '📗 Frase Média', color: '#3b82f6', hidden: false };
+     return { text: '📕 Frase Longa', color: '#ef4444', hidden: false };
   } else {
-     if (count === 1) return { text: '📖 Muito Fácil', color: '#22c55e' };
-     if (count === 2) return { text: '📗 Fácil', color: '#3b82f6' };
-     if (count === 3) return { text: '📘 Médio', color: '#f59e0b' };
-     return { text: '📕 Desafio', color: '#ef4444' };
+     if (count === 1) return { text: '📖 Muito Fácil', color: '#22c55e', hidden: false };
+     if (count === 2) return { text: '📗 Fácil', color: '#3b82f6', hidden: false };
+     if (count === 3) return { text: '📘 Médio', color: '#f59e0b', hidden: false };
+     return { text: '📕 Desafio', color: '#ef4444', hidden: false };
   }
 }
 
@@ -348,10 +358,15 @@ function loadNewWord() {
   renderWord(w, false);
   setMessage('');
   
-  // Mostrar dificuldade
+  // Mostrar ou ocultar dificuldade
   const difficulty = getWordDifficulty(w);
-  el.wordDifficulty.textContent = difficulty.text;
-  el.wordDifficulty.style.color = difficulty.color;
+  if (difficulty.hidden) {
+    el.wordDifficulty.style.display = 'none';
+  } else {
+    el.wordDifficulty.style.display = 'block';
+    el.wordDifficulty.textContent = difficulty.text;
+    el.wordDifficulty.style.color = difficulty.color;
+  }
 }
 
 function updateHighScore() {
@@ -511,7 +526,7 @@ el.loadBtn.addEventListener('click', () => {
   words = onlyValid;
   buildDeck();
   loadNewWord();
-  setMessage(`Carregado ${words.length} ${gameMode === 'phrases' ? 'frase(s)' : gameMode === 'letters' ? 'letra(s)' : gameMode === 'numbers' ? 'número(s)' : 'palavra(s)'}.`, 'muted');
+  setMessage(`Carregado ${words.length} ${getItemTypePlural(gameMode)}.`, 'muted');
 });
 
 // ---------------------- Controle de Modos ----------------------
