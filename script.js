@@ -4,6 +4,10 @@ let dbPhrases = [];
 let dbLetters = [];
 let gameMode = 'syllables'; // 'syllables' | 'phrases' | 'letters'
 
+// Regex patterns for validation
+const SYLLABLE_PATTERN = /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/;
+const LETTER_PATTERN = /^[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]$/;
+
 const el = {
   word: document.getElementById('word'),
   helpBtn: document.getElementById('helpBtn'),
@@ -167,7 +171,10 @@ function handleSyllableClick(e) {
     // Para letras, mostrar botão de ouvir imediatamente
     el.speakBtn.style.display = 'inline-block';
   } else {
-    parts = gameMode === 'phrases' ? text.split(' ') : text.split('-');
+    // Reuse parts variable if not already set
+    if (!parts) {
+      parts = gameMode === 'phrases' ? text.split(' ') : text.split('-');
+    }
     if (syllablesClicked.size === parts.length) {
       el.speakBtn.style.display = 'inline-block';
     }
@@ -450,14 +457,14 @@ el.loadBtn.addEventListener('click', () => {
   
   let onlyValid;
   if (gameMode === 'syllables') {
-    onlyValid = parts.filter(w => /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/.test(w));
+    onlyValid = parts.filter(w => SYLLABLE_PATTERN.test(w));
     if (!onlyValid.length) {
       setMessage('Nenhuma palavra válida encontrada. Use hífens para separar sílabas (ex.: ca-sa).', 'danger');
       return;
     }
   } else if (gameMode === 'letters') {
     // No modo letras, aceita apenas letras únicas
-    onlyValid = parts.filter(w => /^[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]$/.test(w));
+    onlyValid = parts.filter(w => LETTER_PATTERN.test(w));
     if (!onlyValid.length) {
       setMessage('Nenhuma letra válida encontrada. Digite apenas letras individuais.', 'danger');
       return;
