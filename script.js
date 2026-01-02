@@ -1,7 +1,15 @@
 // Dados carregados dos JSONs
 let dbSyllables = [];
 let dbPhrases = [];
-let gameMode = 'syllables'; // 'syllables' | 'phrases'
+let dbLetters = [];
+let dbColors = [];
+let gameMode = 'syllables'; // 'syllables' | 'phrases' | 'letters' | 'numbers' | 'colors'
+let numbersRange = { min: 0, max: 10 }; // intervalo para números
+
+// Regex patterns for validation
+const SYLLABLE_PATTERN = /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/;
+const LETTER_PATTERN = /^[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]$/;
+const NUMBER_PATTERN = /^-?\d+$/;
 
 const el = {
   word: document.getElementById('word'),
@@ -26,6 +34,16 @@ const el = {
   modeSelection: document.getElementById('modeSelection'),
   modeSyllablesBtn: document.getElementById('modeSyllablesBtn'),
   modePhrasesBtn: document.getElementById('modePhrasesBtn'),
+  modeLettersBtn: document.getElementById('modeLettersBtn'),
+  modeNumbersBtn: document.getElementById('modeNumbersBtn'),
+  modeColorsBtn: document.getElementById('modeColorsBtn'),
+  numbersConfig: document.getElementById('numbersConfig'),
+  minNumber: document.getElementById('minNumber'),
+  maxNumber: document.getElementById('maxNumber'),
+  minNumberValue: document.getElementById('minNumberValue'),
+  maxNumberValue: document.getElementById('maxNumberValue'),
+  confirmNumbersBtn: document.getElementById('confirmNumbersBtn'),
+  cancelNumbersBtn: document.getElementById('cancelNumbersBtn'),
   changeModeBtn: document.getElementById('changeModeBtn'),
   toggleCaseBtn: document.getElementById('toggleCaseBtn'),
   streakDisplay: document.getElementById('streakDisplay'),
@@ -87,7 +105,7 @@ function nextFromDeck() {
 }
 
 function stripHyphens(text) {
-  if (gameMode === 'phrases') return text;
+  if (gameMode === 'phrases' || gameMode === 'letters' || gameMode === 'numbers' || gameMode === 'colors') return text;
   return text.replace(/\s+/g, '').replace(/-/g, '');
 }
 
@@ -98,10 +116,50 @@ function renderWord(text, showParts) {
   if (gameMode === 'phrases') {
     parts = text.split(' ');
     separator = '<span class="syllable" style="opacity:0"> </span>'; // espaço visível
+  } else if (gameMode === 'letters' || gameMode === 'numbers') {
+    // Para letras e números, sempre mostrar como botão clicável
+    parts = [text];
+    separator = '';
+    el.word.innerHTML = `<button class="syllable-btn" data-index="0">${text}</button>`;
+    
+    // Ocultar botão de ajuda para letras e números
+    el.helpBtn.style.display = 'none';
+    
+    // adicionar listeners após DOM update
+    setTimeout(() => {
+      document.querySelectorAll('.syllable-btn').forEach(btn => {
+        btn.addEventListener('click', handleSyllableClick);
+      });
+    }, 0);
+    return; // sair da função
+  } else if (gameMode === 'colors') {
+    // Para cores, mostrar retângulo colorido
+    const colorData = JSON.parse(text);
+    el.word.innerHTML = `<button class="color-box" data-index="0" data-color="${colorData.name}" style="background-color: ${colorData.color}; width: 200px; height: 200px; border-radius: 20px; border: 3px solid #fff; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transition: transform 0.2s;"></button>`;
+    
+    // Ocultar botão de ajuda para cores
+    el.helpBtn.style.display = 'none';
+    
+    // adicionar listeners após DOM update
+    setTimeout(() => {
+      document.querySelectorAll('.color-box').forEach(btn => {
+        btn.addEventListener('click', handleSyllableClick);
+        btn.addEventListener('mouseenter', (e) => {
+          e.target.style.transform = 'scale(1.05)';
+        });
+        btn.addEventListener('mouseleave', (e) => {
+          e.target.style.transform = 'scale(1)';
+        });
+      });
+    }, 0);
+    return; // sair da função
   } else {
     parts = text.split('-');
     separator = '<span class="syllable" style="opacity:.5">-</span>';
   }
+
+  // Mostrar botão de ajuda para palavras e frases
+  el.helpBtn.style.display = 'inline-block';
 
   if (showParts) {
     el.helpBtn.textContent = gameMode === 'phrases' ? 'Esconder palavras' : 'Esconder sílabas';
@@ -122,8 +180,21 @@ function renderWord(text, showParts) {
 function handleSyllableClick(e) {
   const index = parseInt(e.target.dataset.index);
   const text = words[deck[idx]];
-  const parts = gameMode === 'phrases' ? text.split(' ') : text.split('-');
-  const syllable = parts[index];
+  let parts;
+  let syllable;
+  
+  if (gameMode === 'phrases') {
+    parts = text.split(' ');
+    syllable = parts[index];
+  } else if (gameMode === 'letters' || gameMode === 'numbers') {
+    syllable = text; // letra ou número único
+  } else if (gameMode === 'colors') {
+    // Para cores, pegar o nome da cor do atributo data-color
+    syllable = e.target.dataset.color;
+  } else {
+    parts = text.split('-');
+    syllable = parts[index];
+  }
   
   // Adicionar animação
   e.target.classList.add('clicked');
@@ -139,6 +210,16 @@ function handleSyllableClick(e) {
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
   syllablesClicked.add(index);
+  
+  // Para letras, números e cores, não mostrar botão de ouvir
+  if (gameMode === 'letters' || gameMode === 'numbers' || gameMode === 'colors') {
+    return; // não fazer mais nada
+  }
+  
+  // Para palavras e frases, mostrar botão de ouvir quando necessário
+  if (!parts) {
+    parts = gameMode === 'phrases' ? text.split(' ') : text.split('-');
+  }
   if (syllablesClicked.size === parts.length) {
     el.speakBtn.style.display = 'inline-block';
   }
@@ -261,18 +342,37 @@ function getEncouragingMessage() {
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
+function getItemTypePlural(mode) {
+  const types = {
+    'phrases': 'frase(s)',
+    'letters': 'letra(s)',
+    'numbers': 'número(s)',
+    'colors': 'cor(es)',
+    'syllables': 'palavra(s)'
+  };
+  return types[mode] || 'item(s)';
+}
+
 function getWordDifficulty(text) {
+  if (gameMode === 'letters') {
+    return { text: '🔤 Letra', color: '#22c55e', hidden: false };
+  }
+  
+  if (gameMode === 'numbers' || gameMode === 'colors') {
+    return { text: '', color: '', hidden: true }; // sem dificuldade para números e cores
+  }
+  
   const count = gameMode === 'phrases' ? text.split(' ').length : text.split('-').length;
   
   if (gameMode === 'phrases') {
-     if (count <= 3) return { text: '📖 Frase Curta', color: '#22c55e' };
-     if (count <= 5) return { text: '📗 Frase Média', color: '#3b82f6' };
-     return { text: '📕 Frase Longa', color: '#ef4444' };
+     if (count <= 3) return { text: '📖 Frase Curta', color: '#22c55e', hidden: false };
+     if (count <= 5) return { text: '📗 Frase Média', color: '#3b82f6', hidden: false };
+     return { text: '📕 Frase Longa', color: '#ef4444', hidden: false };
   } else {
-     if (count === 1) return { text: '📖 Muito Fácil', color: '#22c55e' };
-     if (count === 2) return { text: '📗 Fácil', color: '#3b82f6' };
-     if (count === 3) return { text: '📘 Médio', color: '#f59e0b' };
-     return { text: '📕 Desafio', color: '#ef4444' };
+     if (count === 1) return { text: '📖 Muito Fácil', color: '#22c55e', hidden: false };
+     if (count === 2) return { text: '📗 Fácil', color: '#3b82f6', hidden: false };
+     if (count === 3) return { text: '📘 Médio', color: '#f59e0b', hidden: false };
+     return { text: '📕 Desafio', color: '#ef4444', hidden: false };
   }
 }
 
@@ -284,10 +384,15 @@ function loadNewWord() {
   renderWord(w, false);
   setMessage('');
   
-  // Mostrar dificuldade
+  // Mostrar ou ocultar dificuldade
   const difficulty = getWordDifficulty(w);
-  el.wordDifficulty.textContent = difficulty.text;
-  el.wordDifficulty.style.color = difficulty.color;
+  if (difficulty.hidden) {
+    el.wordDifficulty.style.display = 'none';
+  } else {
+    el.wordDifficulty.style.display = 'block';
+    el.wordDifficulty.textContent = difficulty.text;
+    el.wordDifficulty.style.color = difficulty.color;
+  }
 }
 
 function updateHighScore() {
@@ -308,20 +413,17 @@ el.helpBtn.addEventListener('click', () => {
   }
 
   // alterna exibição
-  if (!usedHelp && el.helpBtn.textContent.startsWith('Mostrar')) {
+  if (!usedHelp && (el.helpBtn.textContent.startsWith('Mostrar') || el.helpBtn.textContent.startsWith('Ouvir'))) {
     usedHelp = true; // marcar que houve ajuda nesta palavra
     renderWord(words[deck[idx]], true);
-    el.helpBtn.textContent = 'Esconder sílabas';
-    setMessage('Ajuda ativada: esta palavra não vale estrela.', 'warn');
+    setMessage('Ajuda ativada: este item não vale estrela.', 'warn');
   } else if (el.helpBtn.textContent.startsWith('Esconder')) {
     renderWord(words[deck[idx]], false);
-    el.helpBtn.textContent = 'Mostrar sílabas';
     // manter aviso de ajuda
   } else {
     // fallback
     usedHelp = true;
     renderWord(words[deck[idx]], true);
-    el.helpBtn.textContent = 'Esconder sílabas';
     setMessage('Ajuda ativada: este item não vale estrela.', 'warn');
   }
 });
@@ -365,7 +467,39 @@ el.correctBtn.addEventListener('click', () => {
 });
 
 el.nextBtn.addEventListener('click', () => {
-  // Se pular, zera a sequência
+  // Para letras, números e cores, sempre incrementar pontuação (modo treino)
+  if (gameMode === 'letters' || gameMode === 'numbers' || gameMode === 'colors') {
+    // Incrementar contadores
+    streak++;
+    totalWords++;
+    sessionWords++;
+    localStorage.setItem('readingTotalWords', String(totalWords));
+    
+    // Animações
+    el.word.classList.add('bounce');
+    setTimeout(() => el.word.classList.remove('bounce'), 600);
+    animateMascot('happy');
+    playSuccessSound();
+    
+    // Atualizar UI
+    renderStreak(streak);
+    updateProgress();
+    
+    // Mensagens especiais para combos
+    let message = getEncouragingMessage() + ` +1 ⭐`;
+    if (streak === 3) message = '🔥 3 seguidas! Você está pegando fogo!';
+    else if (streak === 5) message = '⚡ 5 seguidas! Incrível!';
+    else if (streak === 10) message = '💫 10 seguidas! FENOMENAL!';
+    
+    setMessage(message, 'win');
+    updateHighScore();
+    checkAchievements();
+    
+    setTimeout(loadNewWord, 650);
+    return;
+  }
+  
+  // Para palavras e frases, comportamento original (zera sequência ao pular)
   streak = 0;
   renderStreak(0);
   
@@ -419,9 +553,23 @@ el.loadBtn.addEventListener('click', () => {
   
   let onlyValid;
   if (gameMode === 'syllables') {
-    onlyValid = parts.filter(w => /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/.test(w));
+    onlyValid = parts.filter(w => SYLLABLE_PATTERN.test(w));
     if (!onlyValid.length) {
       setMessage('Nenhuma palavra válida encontrada. Use hífens para separar sílabas (ex.: ca-sa).', 'danger');
+      return;
+    }
+  } else if (gameMode === 'letters') {
+    // No modo letras, aceita apenas letras únicas
+    onlyValid = parts.filter(w => LETTER_PATTERN.test(w));
+    if (!onlyValid.length) {
+      setMessage('Nenhuma letra válida encontrada. Digite apenas letras individuais.', 'danger');
+      return;
+    }
+  } else if (gameMode === 'numbers') {
+    // No modo números, aceita apenas números inteiros
+    onlyValid = parts.filter(w => NUMBER_PATTERN.test(w));
+    if (!onlyValid.length) {
+      setMessage('Nenhum número válido encontrado. Digite apenas números.', 'danger');
       return;
     }
   } else {
@@ -436,7 +584,7 @@ el.loadBtn.addEventListener('click', () => {
   words = onlyValid;
   buildDeck();
   loadNewWord();
-  setMessage(`Carregado ${words.length} ${gameMode === 'phrases' ? 'frase(s)' : 'palavra(s)'}.`, 'muted');
+  setMessage(`Carregado ${words.length} ${getItemTypePlural(gameMode)}.`, 'muted');
 });
 
 // ---------------------- Controle de Modos ----------------------
@@ -455,14 +603,38 @@ function setMode(mode) {
     el.wordsInput.value = dbSyllables.join(', ');
     el.configSummary.textContent = 'Carregar/editar lista de palavras (sílabas separadas por "-")';
     el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>ca-sa</code>, <code>ho-ra</code>, <code>so-fá</code>';
+    el.nextBtn.textContent = 'Próxima palavra ➜';
+  } else if (mode === 'letters') {
+    words = [...dbLetters];
+    el.wordsInput.value = dbLetters.join(', ');
+    el.configSummary.textContent = 'Carregar/editar lista de letras';
+    el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>A</code>, <code>B</code>, <code>C</code>';
+    el.nextBtn.textContent = 'Próxima letra ➜';
+  } else if (mode === 'numbers') {
+    // Gerar números baseado no range
+    words = [];
+    for (let i = numbersRange.min; i <= numbersRange.max; i++) {
+      words.push(String(i));
+    }
+    el.wordsInput.value = words.join(', ');
+    el.configSummary.textContent = 'Carregar/editar lista de números';
+    el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>1</code>, <code>2</code>, <code>3</code>';
+    el.nextBtn.textContent = 'Próximo número ➜';
+  } else if (mode === 'colors') {
+    // Para cores, armazenar como JSON string
+    words = dbColors.map(c => JSON.stringify(c));
+    el.wordsInput.value = dbColors.map(c => c.name).join(', ');
+    el.configSummary.textContent = 'Carregar/editar lista de cores';
+    el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>Vermelho</code>, <code>Azul</code>, <code>Verde</code>';
+    el.nextBtn.textContent = 'Próxima cor ➜';
   } else {
     words = [...dbPhrases];
     el.wordsInput.value = dbPhrases.join('\n');
     el.configSummary.textContent = 'Carregar/editar lista de frases';
     el.configHelp.innerHTML = 'Separe por quebra de linha. Ex.: <code>O gato mia</code>, <code>A lua brilha</code>';
+    el.nextBtn.textContent = 'Próxima frase ➜';
   }
   
-  el.nextBtn.textContent = gameMode === 'syllables' ? 'Próxima palavra ➜' : 'Próxima frase ➜';
   streak = 0;
   sessionWords = 0;
   buildDeck();
@@ -475,6 +647,47 @@ function setMode(mode) {
 
 el.modeSyllablesBtn.addEventListener('click', () => setMode('syllables'));
 el.modePhrasesBtn.addEventListener('click', () => setMode('phrases'));
+el.modeLettersBtn.addEventListener('click', () => setMode('letters'));
+el.modeColorsBtn.addEventListener('click', () => setMode('colors'));
+
+// Numbers mode: show config modal first
+el.modeNumbersBtn.addEventListener('click', () => {
+  el.modeSelection.classList.add('hidden');
+  el.numbersConfig.classList.remove('hidden');
+});
+
+// Numbers config slider handlers
+el.minNumber.addEventListener('input', (e) => {
+  const value = parseInt(e.target.value);
+  el.minNumberValue.textContent = value;
+  // Ensure max is always >= min
+  if (parseInt(el.maxNumber.value) < value) {
+    el.maxNumber.value = value;
+    el.maxNumberValue.textContent = value;
+  }
+});
+
+el.maxNumber.addEventListener('input', (e) => {
+  const value = parseInt(e.target.value);
+  el.maxNumberValue.textContent = value;
+  // Ensure min is always <= max
+  if (parseInt(el.minNumber.value) > value) {
+    el.minNumber.value = value;
+    el.minNumberValue.textContent = value;
+  }
+});
+
+el.confirmNumbersBtn.addEventListener('click', () => {
+  numbersRange.min = parseInt(el.minNumber.value);
+  numbersRange.max = parseInt(el.maxNumber.value);
+  el.numbersConfig.classList.add('hidden');
+  setMode('numbers');
+});
+
+el.cancelNumbersBtn.addEventListener('click', () => {
+  el.numbersConfig.classList.add('hidden');
+  el.modeSelection.classList.remove('hidden');
+});
 
 el.changeModeBtn.addEventListener('click', () => {
   el.modeSelection.classList.remove('hidden');
@@ -527,15 +740,19 @@ window.addEventListener('keydown', (e) => {
 // Inicialização
 async function initGame() {
   try {
-    const [resWords, resPhrases] = await Promise.all([
+    const [resWords, resPhrases, resLetters, resColors] = await Promise.all([
       fetch('words.json'),
-      fetch('phrases.json')
+      fetch('phrases.json'),
+      fetch('letters.json'),
+      fetch('colors.json')
     ]);
 
-    if (!resWords.ok || !resPhrases.ok) throw new Error('Erro ao carregar dados');
+    if (!resWords.ok || !resPhrases.ok || !resLetters.ok || !resColors.ok) throw new Error('Erro ao carregar dados');
 
     dbSyllables = await resWords.json();
     dbPhrases = await resPhrases.json();
+    dbLetters = await resLetters.json();
+    dbColors = await resColors.json();
     
     // Inicia sem carregar jogo, espera seleção
     el.wordsInput.value = dbSyllables.join(', '); // apenas para facilitar edição do modo padrão

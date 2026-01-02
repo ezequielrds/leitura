@@ -90,6 +90,13 @@
     <div class="mode-card">
       <h2>O que vamos ler hoje?</h2>
       <div class="mode-buttons">
+        <button id="modeLettersBtn" class="mode-btn">
+          <span class="mode-icon">🔤</span>
+          <span class="mode-text">
+            <strong>Letras</strong>
+            <small>Alfabeto</small>
+          </span>
+        </button>
         <button id="modeSyllablesBtn" class="mode-btn">
           <span class="mode-icon">🦉</span>
           <span class="mode-text">
@@ -104,6 +111,41 @@
             <small>Pequenas sentenças</small>
           </span>
         </button>
+        <button id="modeNumbersBtn" class="mode-btn">
+          <span class="mode-icon">🔢</span>
+          <span class="mode-text">
+            <strong>Números</strong>
+            <small>Praticar números</small>
+          </span>
+        </button>
+        <button id="modeColorsBtn" class="mode-btn">
+          <span class="mode-icon">🎨</span>
+          <span class="mode-text">
+            <strong>Cores</strong>
+            <small>Aprender cores</small>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="numbersConfig" class="mode-overlay hidden">
+    <div class="mode-card">
+      <h2>Configurar Números</h2>
+      <p style="color:var(--muted); margin-bottom:20px">Escolha o intervalo de números para praticar:</p>
+      <div style="margin-bottom:20px">
+        <label for="minNumber" style="display:block; margin-bottom:8px">Número mínimo:</label>
+        <input type="range" id="minNumber" min="0" max="100" value="0" style="width:100%">
+        <div id="minNumberValue" style="text-align:center; font-size:24px; font-weight:bold; margin-top:8px">0</div>
+      </div>
+      <div style="margin-bottom:30px">
+        <label for="maxNumber" style="display:block; margin-bottom:8px">Número máximo:</label>
+        <input type="range" id="maxNumber" min="1" max="100" value="10" style="width:100%">
+        <div id="maxNumberValue" style="text-align:center; font-size:24px; font-weight:bold; margin-top:8px">10</div>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:center">
+        <button id="confirmNumbersBtn" class="btn-primary" style="flex:1; max-width:200px">Confirmar</button>
+        <button id="cancelNumbersBtn" class="btn-ghost" style="flex:1; max-width:200px">Cancelar</button>
       </div>
     </div>
   </div>
