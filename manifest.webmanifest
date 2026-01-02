@@ -4,6 +4,7 @@
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "theme_color": "#0b1024",
   "background_color": "#0b1024",
   "description": "Leitura por sílabas, letras, números, cores e frases para praticar em qualquer dispositivo.",
