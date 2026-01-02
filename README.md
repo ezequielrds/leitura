@@ -4,9 +4,27 @@ Aplicativo educacional interativo para auxiliar crianças no aprendizado de leit
 
 ## 🌐 Ver o Aplicativo Online
 
+### 🚀 Opção 1: Preview Imediato (Funciona Agora!)
+
+Você pode visualizar o aplicativo imediatamente sem configuração usando o HTMLPreview:
+
+**👉 [CLIQUE AQUI PARA VER O PREVIEW](https://htmlpreview.github.io/?https://github.com/ezequielrds/leitura/blob/copilot/add-github-pages-branch/index.html)**
+
+Este link funciona imediatamente e não requer nenhuma configuração!
+
+> **Nota:** O HTMLPreview pode ter algumas limitações com áudio. Para melhor experiência, use a Opção 2 abaixo.
+
+### 📌 Opção 2: GitHub Pages Oficial
+
 **Link para GitHub Pages:** https://ezequielrds.github.io/leitura/
 
-> ⚠️ **Nota:** Para que o link funcione, é necessário ativar o GitHub Pages nas configurações do repositório (ver instruções abaixo).
+Para ativar este link, siga os passos abaixo:
+1. Vá em **Settings** → **Pages** do repositório
+2. Em **Source**, selecione **Deploy from a branch**
+3. Em **Branch**, selecione **gh-pages** e **/root**
+4. Clique em **Save**
+
+O workflow já está configurado para criar o branch `gh-pages` automaticamente quando você fizer push.
 
 ## 📋 Funcionalidades
 
@@ -18,17 +36,6 @@ Aplicativo educacional interativo para auxiliar crianças no aprendizado de leit
 - ⭐ **Recompensas**: Sistema de conquistas para celebrar o progresso
 - 🔄 **Personalização**: Opção de alternar entre maiúsculas e minúsculas
 - ✏️ **Lista Customizável**: Possibilidade de carregar suas próprias palavras
-
-## 🚀 Como Acessar o Aplicativo
-
-O aplicativo é automaticamente publicado no GitHub Pages através de GitHub Actions.
-
-### Acesso Direto
-
-Após o push para o branch `copilot/add-github-pages-branch`, o site estará disponível em:
-- **URL do preview**: https://ezequielrds.github.io/leitura/
-
-O deploy é automático - não é necessário configuração manual! O workflow cria automaticamente o branch `gh-pages` e publica o conteúdo.
 
 ## 🛠️ Desenvolvimento Local
 
