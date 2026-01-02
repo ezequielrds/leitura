@@ -19,30 +19,16 @@ Aplicativo educacional interativo para auxiliar crianças no aprendizado de leit
 - 🔄 **Personalização**: Opção de alternar entre maiúsculas e minúsculas
 - ✏️ **Lista Customizável**: Possibilidade de carregar suas próprias palavras
 
-## 🚀 Como Configurar o GitHub Pages
+## 🚀 Como Acessar o Aplicativo
 
-Para disponibilizar o aplicativo via GitHub Pages, siga estes passos:
+O aplicativo é automaticamente publicado no GitHub Pages através de GitHub Actions.
 
-### 1. Ativar GitHub Pages
+### Acesso Direto
 
-1. Vá até as **Settings** (Configurações) do repositório
-2. No menu lateral, clique em **Pages**
-3. Em **Source**, selecione:
-   - Source: **GitHub Actions**
-4. Clique em **Save** (Salvar)
+Após o push para o branch `copilot/add-github-pages-branch`, o site estará disponível em:
+- **URL do preview**: https://ezequielrds.github.io/leitura/
 
-### 2. Executar o Workflow (se necessário)
-
-Se o workflow ainda não foi executado automaticamente:
-
-1. Vá para a aba **Actions** do repositório
-2. Clique no workflow "Deploy to GitHub Pages"
-3. Clique em "Run workflow" e selecione o branch `copilot/add-github-pages-branch`
-
-### 3. Acessar o Site
-
-Após alguns segundos, o site estará disponível em:
-- **URL principal**: https://ezequielrds.github.io/leitura/
+O deploy é automático - não é necessário configuração manual! O workflow cria automaticamente o branch `gh-pages` e publica o conteúdo.
 
 ## 🛠️ Desenvolvimento Local
 
