@@ -766,6 +766,15 @@ async function initGame() {
 // Inicialização
 initGame();
 
+// Registrar service worker para PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.warn('Service worker registration failed:', err);
+    });
+  });
+}
+
 // Interação com mascote
 const encouragements = [
   { text: 'Você está indo muito bem! 🎉', audio: 'audio/Você está indo muito bem.mp3' },
