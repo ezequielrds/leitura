@@ -2,7 +2,8 @@
 let dbSyllables = [];
 let dbPhrases = [];
 let dbLetters = [];
-let gameMode = 'syllables'; // 'syllables' | 'phrases' | 'letters' | 'numbers'
+let dbColors = [];
+let gameMode = 'syllables'; // 'syllables' | 'phrases' | 'letters' | 'numbers' | 'colors'
 let numbersRange = { min: 0, max: 10 }; // intervalo para números
 
 // Regex patterns for validation
@@ -35,6 +36,7 @@ const el = {
   modePhrasesBtn: document.getElementById('modePhrasesBtn'),
   modeLettersBtn: document.getElementById('modeLettersBtn'),
   modeNumbersBtn: document.getElementById('modeNumbersBtn'),
+  modeColorsBtn: document.getElementById('modeColorsBtn'),
   numbersConfig: document.getElementById('numbersConfig'),
   minNumber: document.getElementById('minNumber'),
   maxNumber: document.getElementById('maxNumber'),
@@ -103,7 +105,7 @@ function nextFromDeck() {
 }
 
 function stripHyphens(text) {
-  if (gameMode === 'phrases' || gameMode === 'letters' || gameMode === 'numbers') return text;
+  if (gameMode === 'phrases' || gameMode === 'letters' || gameMode === 'numbers' || gameMode === 'colors') return text;
   return text.replace(/\s+/g, '').replace(/-/g, '');
 }
 
@@ -114,25 +116,53 @@ function renderWord(text, showParts) {
   if (gameMode === 'phrases') {
     parts = text.split(' ');
     separator = '<span class="syllable" style="opacity:0"> </span>'; // espaço visível
-  } else if (gameMode === 'letters') {
-    parts = [text]; // letra única
+  } else if (gameMode === 'letters' || gameMode === 'numbers') {
+    // Para letras e números, sempre mostrar como botão clicável
+    parts = [text];
     separator = '';
-  } else if (gameMode === 'numbers') {
-    parts = [text]; // número único
-    separator = '';
+    el.word.innerHTML = `<button class="syllable-btn" data-index="0">${text}</button>`;
+    
+    // Ocultar botão de ajuda para letras e números
+    el.helpBtn.style.display = 'none';
+    
+    // adicionar listeners após DOM update
+    setTimeout(() => {
+      document.querySelectorAll('.syllable-btn').forEach(btn => {
+        btn.addEventListener('click', handleSyllableClick);
+      });
+    }, 0);
+    return; // sair da função
+  } else if (gameMode === 'colors') {
+    // Para cores, mostrar retângulo colorido
+    const colorData = JSON.parse(text);
+    el.word.innerHTML = `<button class="color-box" data-index="0" data-color="${colorData.name}" style="background-color: ${colorData.color}; width: 200px; height: 200px; border-radius: 20px; border: 3px solid #fff; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transition: transform 0.2s;"></button>`;
+    
+    // Ocultar botão de ajuda para cores
+    el.helpBtn.style.display = 'none';
+    
+    // adicionar listeners após DOM update
+    setTimeout(() => {
+      document.querySelectorAll('.color-box').forEach(btn => {
+        btn.addEventListener('click', handleSyllableClick);
+        btn.addEventListener('mouseenter', (e) => {
+          e.target.style.transform = 'scale(1.05)';
+        });
+        btn.addEventListener('mouseleave', (e) => {
+          e.target.style.transform = 'scale(1)';
+        });
+      });
+    }, 0);
+    return; // sair da função
   } else {
     parts = text.split('-');
     separator = '<span class="syllable" style="opacity:.5">-</span>';
   }
 
+  // Mostrar botão de ajuda para palavras e frases
+  el.helpBtn.style.display = 'inline-block';
+
   if (showParts) {
-    if (gameMode === 'letters') {
-      el.helpBtn.textContent = 'Esconder ajuda';
-    } else if (gameMode === 'numbers') {
-      el.helpBtn.textContent = 'Esconder ajuda';
-    } else {
-      el.helpBtn.textContent = gameMode === 'phrases' ? 'Esconder palavras' : 'Esconder sílabas';
-    }
+    el.helpBtn.textContent = gameMode === 'phrases' ? 'Esconder palavras' : 'Esconder sílabas';
     el.word.innerHTML = parts.map((p, i) => `<button class="syllable-btn" data-index="${i}">${p}</button>`).join(separator);
     
     // adicionar listeners após DOM update
@@ -142,13 +172,7 @@ function renderWord(text, showParts) {
       });
     }, 0);
   } else {
-    if (gameMode === 'letters') {
-      el.helpBtn.textContent = 'Ouvir letra';
-    } else if (gameMode === 'numbers') {
-      el.helpBtn.textContent = 'Ouvir número';
-    } else {
-      el.helpBtn.textContent = gameMode === 'phrases' ? 'Separar palavras' : 'Mostrar sílabas';
-    }
+    el.helpBtn.textContent = gameMode === 'phrases' ? 'Separar palavras' : 'Mostrar sílabas';
     el.word.textContent = stripHyphens(text);
   }
 }
@@ -162,10 +186,11 @@ function handleSyllableClick(e) {
   if (gameMode === 'phrases') {
     parts = text.split(' ');
     syllable = parts[index];
-  } else if (gameMode === 'letters') {
-    syllable = text; // letra única
-  } else if (gameMode === 'numbers') {
-    syllable = text; // número único
+  } else if (gameMode === 'letters' || gameMode === 'numbers') {
+    syllable = text; // letra ou número único
+  } else if (gameMode === 'colors') {
+    // Para cores, pegar o nome da cor do atributo data-color
+    syllable = e.target.dataset.color;
   } else {
     parts = text.split('-');
     syllable = parts[index];
@@ -186,17 +211,17 @@ function handleSyllableClick(e) {
   speechSynthesis.speak(u);
   syllablesClicked.add(index);
   
-  if (gameMode === 'letters' || gameMode === 'numbers') {
-    // Para letras e números, mostrar botão de ouvir imediatamente
+  // Para letras, números e cores, não mostrar botão de ouvir
+  if (gameMode === 'letters' || gameMode === 'numbers' || gameMode === 'colors') {
+    return; // não fazer mais nada
+  }
+  
+  // Para palavras e frases, mostrar botão de ouvir quando necessário
+  if (!parts) {
+    parts = gameMode === 'phrases' ? text.split(' ') : text.split('-');
+  }
+  if (syllablesClicked.size === parts.length) {
     el.speakBtn.style.display = 'inline-block';
-  } else {
-    // Reuse parts variable if not already set
-    if (!parts) {
-      parts = gameMode === 'phrases' ? text.split(' ') : text.split('-');
-    }
-    if (syllablesClicked.size === parts.length) {
-      el.speakBtn.style.display = 'inline-block';
-    }
   }
 }
 
@@ -322,6 +347,7 @@ function getItemTypePlural(mode) {
     'phrases': 'frase(s)',
     'letters': 'letra(s)',
     'numbers': 'número(s)',
+    'colors': 'cor(es)',
     'syllables': 'palavra(s)'
   };
   return types[mode] || 'item(s)';
@@ -332,8 +358,8 @@ function getWordDifficulty(text) {
     return { text: '🔤 Letra', color: '#22c55e', hidden: false };
   }
   
-  if (gameMode === 'numbers') {
-    return { text: '', color: '', hidden: true }; // sem dificuldade para números
+  if (gameMode === 'numbers' || gameMode === 'colors') {
+    return { text: '', color: '', hidden: true }; // sem dificuldade para números e cores
   }
   
   const count = gameMode === 'phrases' ? text.split(' ').length : text.split('-').length;
@@ -441,7 +467,39 @@ el.correctBtn.addEventListener('click', () => {
 });
 
 el.nextBtn.addEventListener('click', () => {
-  // Se pular, zera a sequência
+  // Para letras, números e cores, sempre incrementar pontuação (modo treino)
+  if (gameMode === 'letters' || gameMode === 'numbers' || gameMode === 'colors') {
+    // Incrementar contadores
+    streak++;
+    totalWords++;
+    sessionWords++;
+    localStorage.setItem('readingTotalWords', String(totalWords));
+    
+    // Animações
+    el.word.classList.add('bounce');
+    setTimeout(() => el.word.classList.remove('bounce'), 600);
+    animateMascot('happy');
+    playSuccessSound();
+    
+    // Atualizar UI
+    renderStreak(streak);
+    updateProgress();
+    
+    // Mensagens especiais para combos
+    let message = getEncouragingMessage() + ` +1 ⭐`;
+    if (streak === 3) message = '🔥 3 seguidas! Você está pegando fogo!';
+    else if (streak === 5) message = '⚡ 5 seguidas! Incrível!';
+    else if (streak === 10) message = '💫 10 seguidas! FENOMENAL!';
+    
+    setMessage(message, 'win');
+    updateHighScore();
+    checkAchievements();
+    
+    setTimeout(loadNewWord, 650);
+    return;
+  }
+  
+  // Para palavras e frases, comportamento original (zera sequência ao pular)
   streak = 0;
   renderStreak(0);
   
@@ -562,6 +620,13 @@ function setMode(mode) {
     el.configSummary.textContent = 'Carregar/editar lista de números';
     el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>1</code>, <code>2</code>, <code>3</code>';
     el.nextBtn.textContent = 'Próximo número ➜';
+  } else if (mode === 'colors') {
+    // Para cores, armazenar como JSON string
+    words = dbColors.map(c => JSON.stringify(c));
+    el.wordsInput.value = dbColors.map(c => c.name).join(', ');
+    el.configSummary.textContent = 'Carregar/editar lista de cores';
+    el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>Vermelho</code>, <code>Azul</code>, <code>Verde</code>';
+    el.nextBtn.textContent = 'Próxima cor ➜';
   } else {
     words = [...dbPhrases];
     el.wordsInput.value = dbPhrases.join('\n');
@@ -583,6 +648,7 @@ function setMode(mode) {
 el.modeSyllablesBtn.addEventListener('click', () => setMode('syllables'));
 el.modePhrasesBtn.addEventListener('click', () => setMode('phrases'));
 el.modeLettersBtn.addEventListener('click', () => setMode('letters'));
+el.modeColorsBtn.addEventListener('click', () => setMode('colors'));
 
 // Numbers mode: show config modal first
 el.modeNumbersBtn.addEventListener('click', () => {
@@ -674,17 +740,19 @@ window.addEventListener('keydown', (e) => {
 // Inicialização
 async function initGame() {
   try {
-    const [resWords, resPhrases, resLetters] = await Promise.all([
+    const [resWords, resPhrases, resLetters, resColors] = await Promise.all([
       fetch('words.json'),
       fetch('phrases.json'),
-      fetch('letters.json')
+      fetch('letters.json'),
+      fetch('colors.json')
     ]);
 
-    if (!resWords.ok || !resPhrases.ok || !resLetters.ok) throw new Error('Erro ao carregar dados');
+    if (!resWords.ok || !resPhrases.ok || !resLetters.ok || !resColors.ok) throw new Error('Erro ao carregar dados');
 
     dbSyllables = await resWords.json();
     dbPhrases = await resPhrases.json();
     dbLetters = await resLetters.json();
+    dbColors = await resColors.json();
     
     // Inicia sem carregar jogo, espera seleção
     el.wordsInput.value = dbSyllables.join(', '); // apenas para facilitar edição do modo padrão
