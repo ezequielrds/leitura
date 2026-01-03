@@ -1,13 +1,13 @@
 {
-  "name": "Leitura por Sílabas – Estrelinhas",
-  "short_name": "Leitura",
+  "name": "Aprendizado",
+  "short_name": "Aprendizado",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
   "theme_color": "#0b1024",
   "background_color": "#0b1024",
-  "description": "Leitura por sílabas, letras, números, cores e frases para praticar em qualquer dispositivo.",
+  "description": "Plataforma de aprendizado com letras, números, cores, palavras e frases para praticar em qualquer dispositivo.",
   "lang": "pt-BR",
   "icons": [
     {
