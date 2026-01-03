@@ -19,6 +19,11 @@ const numberTranslations = {
             'elf', 'zwölf', 'dreizehn', 'vierzehn', 'fünfzehn', 'sechzehn', 'siebzehn', 'achtzehn', 'neunzehn', 'zwanzig']
 };
 
+// Helper function to get localized color name
+function getLocalizedColorName(colorData, language) {
+  return typeof colorData.name === 'object' ? (colorData.name[language] || colorData.name['pt-BR']) : colorData.name;
+}
+
 // Regex patterns for validation
 const SYLLABLE_PATTERN = /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/;
 const LETTER_PATTERN = /^[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]$/;
@@ -141,13 +146,16 @@ function renderWord(text, showParts) {
     
     if (gameMode === 'numbers') {
       const numValue = parseInt(text);
-      if (numValue >= 0 && numValue < 100) {
-        if (numValue <= 20 && numberTranslations[selectedLanguage] && numberTranslations[selectedLanguage][numValue]) {
+      if (numValue >= 0 && numValue <= 20) {
+        if (numberTranslations[selectedLanguage] && numberTranslations[selectedLanguage][numValue]) {
           speakText = numberTranslations[selectedLanguage][numValue];
         } else {
-          // Para números maiores que 20, usar o número mesmo
+          // Fallback para o número mesmo se não houver tradução
           speakText = text;
         }
+      } else {
+        // Para números maiores que 20, usar o número mesmo
+        speakText = text;
       }
     }
     
@@ -166,7 +174,7 @@ function renderWord(text, showParts) {
   } else if (gameMode === 'colors') {
     // Para cores, mostrar retângulo colorido
     const colorData = JSON.parse(text);
-    const colorName = typeof colorData.name === 'object' ? colorData.name[selectedLanguage] : colorData.name;
+    const colorName = getLocalizedColorName(colorData, selectedLanguage);
     el.word.innerHTML = `<button class="color-box" data-index="0" data-color="${colorName}" style="background-color: ${colorData.color}; width: 200px; height: 200px; border-radius: 20px; border: 3px solid #fff; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transition: transform 0.2s;"></button>`;
     
     // Ocultar botão de ajuda para cores
@@ -658,7 +666,7 @@ function setMode(mode) {
   } else if (mode === 'colors') {
     // Para cores, armazenar como JSON string
     words = dbColors.map(c => JSON.stringify(c));
-    const colorNames = dbColors.map(c => typeof c.name === 'object' ? c.name[selectedLanguage] || c.name['pt-BR'] : c.name);
+    const colorNames = dbColors.map(c => getLocalizedColorName(c, selectedLanguage));
     el.wordsInput.value = colorNames.join(', ');
     el.configSummary.textContent = 'Carregar/editar lista de cores';
     el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>Vermelho</code>, <code>Azul</code>, <code>Verde</code>';
@@ -735,8 +743,8 @@ el.languageSelector.addEventListener('change', (e) => {
   selectedLanguage = e.target.value;
   localStorage.setItem('selectedLanguage', selectedLanguage);
   
-  // Reload current word to update display (for colors)
-  if (gameMode === 'colors' && idx >= 0) {
+  // Reload current word to update display (for colors and numbers)
+  if ((gameMode === 'colors' || gameMode === 'numbers') && idx >= 0) {
     loadNewWord();
   }
 });
