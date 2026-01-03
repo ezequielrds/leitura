@@ -5,6 +5,24 @@ let dbLetters = [];
 let dbColors = [];
 let gameMode = 'syllables'; // 'syllables' | 'phrases' | 'letters' | 'numbers' | 'colors'
 let numbersRange = { min: 0, max: 10 }; // intervalo para números
+let selectedLanguage = localStorage.getItem('selectedLanguage') || 'pt-BR'; // idioma selecionado
+
+// Traduções para números (0-100)
+const numberTranslations = {
+  'pt-BR': ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez',
+            'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove', 'vinte'],
+  'en-US': ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+            'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'],
+  'es-ES': ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez',
+            'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte'],
+  'de-DE': ['null', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn',
+            'elf', 'zwölf', 'dreizehn', 'vierzehn', 'fünfzehn', 'sechzehn', 'siebzehn', 'achtzehn', 'neunzehn', 'zwanzig']
+};
+
+// Helper function to get localized color name
+function getLocalizedColorName(colorData, language) {
+  return typeof colorData.name === 'object' ? (colorData.name[language] || colorData.name['pt-BR']) : colorData.name;
+}
 
 // Regex patterns for validation
 const SYLLABLE_PATTERN = /[a-zA-ZáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+-[a-zA-Z]/;
@@ -48,7 +66,8 @@ const el = {
   toggleCaseBtn: document.getElementById('toggleCaseBtn'),
   streakDisplay: document.getElementById('streakDisplay'),
   configSummary: document.getElementById('configSummary'),
-  configHelp: document.getElementById('configHelp')
+  configHelp: document.getElementById('configHelp'),
+  languageSelector: document.getElementById('languageSelector')
 };
 
 // Estado do jogo
@@ -120,7 +139,27 @@ function renderWord(text, showParts) {
     // Para letras e números, sempre mostrar como botão clicável
     parts = [text];
     separator = '';
-    el.word.innerHTML = `<button class="syllable-btn" data-index="0">${text}</button>`;
+    
+    // Para números, mostrar o número visual mas falar o nome
+    let displayText = text;
+    let speakText = text;
+    
+    if (gameMode === 'numbers') {
+      const numValue = parseInt(text);
+      if (numValue >= 0 && numValue <= 20) {
+        if (numberTranslations[selectedLanguage] && numberTranslations[selectedLanguage][numValue]) {
+          speakText = numberTranslations[selectedLanguage][numValue];
+        } else {
+          // Fallback para o número mesmo se não houver tradução
+          speakText = text;
+        }
+      } else {
+        // Para números maiores que 20, usar o número mesmo
+        speakText = text;
+      }
+    }
+    
+    el.word.innerHTML = `<button class="syllable-btn" data-index="0" data-speak="${speakText}">${displayText}</button>`;
     
     // Ocultar botão de ajuda para letras e números
     el.helpBtn.style.display = 'none';
@@ -135,7 +174,8 @@ function renderWord(text, showParts) {
   } else if (gameMode === 'colors') {
     // Para cores, mostrar retângulo colorido
     const colorData = JSON.parse(text);
-    el.word.innerHTML = `<button class="color-box" data-index="0" data-color="${colorData.name}" style="background-color: ${colorData.color}; width: 200px; height: 200px; border-radius: 20px; border: 3px solid #fff; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transition: transform 0.2s;"></button>`;
+    const colorName = getLocalizedColorName(colorData, selectedLanguage);
+    el.word.innerHTML = `<button class="color-box" data-index="0" data-color="${colorName}" style="background-color: ${colorData.color}; width: 200px; height: 200px; border-radius: 20px; border: 3px solid #fff; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transition: transform 0.2s;"></button>`;
     
     // Ocultar botão de ajuda para cores
     el.helpBtn.style.display = 'none';
@@ -186,8 +226,11 @@ function handleSyllableClick(e) {
   if (gameMode === 'phrases') {
     parts = text.split(' ');
     syllable = parts[index];
-  } else if (gameMode === 'letters' || gameMode === 'numbers') {
-    syllable = text; // letra ou número único
+  } else if (gameMode === 'letters') {
+    syllable = text; // letra única
+  } else if (gameMode === 'numbers') {
+    // Para números, usar data-speak se disponível
+    syllable = e.target.dataset.speak || text;
   } else if (gameMode === 'colors') {
     // Para cores, pegar o nome da cor do atributo data-color
     syllable = e.target.dataset.color;
@@ -203,7 +246,7 @@ function handleSyllableClick(e) {
   const u = new SpeechSynthesisUtterance(syllable);
   const v = getPtVoice();
   if (v) u.voice = v;
-  u.lang = (v && v.lang) || 'pt-BR';
+  u.lang = selectedLanguage;
   u.rate = 0.95;
   u.pitch = 1.0;
   u.volume = 1.0;
@@ -424,7 +467,7 @@ el.helpBtn.addEventListener('click', () => {
     // fallback
     usedHelp = true;
     renderWord(words[deck[idx]], true);
-    setMessage('Ajuda ativada: este item não vale estrela.', 'warn');
+    setMessage('Ajuda ativada: este item não vale ponto.', 'warn');
   }
 });
 
@@ -432,7 +475,7 @@ el.correctBtn.addEventListener('click', () => {
   if (usedHelp) {
     streak = 0;
     renderStreak(streak);
-    setMessage('Boa! Tente ler a próxima sem ajuda para ganhar estrelas. ✨', 'muted');
+    setMessage('Boa! Tente ler a próxima sem ajuda para ganhar pontos. 🎯', 'muted');
     setTimeout(loadNewWord, 650);
     return;
   }
@@ -454,7 +497,7 @@ el.correctBtn.addEventListener('click', () => {
   updateProgress();
   
   // Mensagens especiais para combos
-  let message = getEncouragingMessage() + ` +1 ⭐`;
+  let message = getEncouragingMessage() + ` +1 🎯`;
   if (streak === 3) message = '🔥 3 seguidas! Você está pegando fogo!';
   else if (streak === 5) message = '⚡ 5 seguidas! Incrível!';
   else if (streak === 10) message = '💫 10 seguidas! FENOMENAL!';
@@ -486,7 +529,7 @@ el.nextBtn.addEventListener('click', () => {
     updateProgress();
     
     // Mensagens especiais para combos
-    let message = getEncouragingMessage() + ` +1 ⭐`;
+    let message = getEncouragingMessage() + ` +1 🎯`;
     if (streak === 3) message = '🔥 3 seguidas! Você está pegando fogo!';
     else if (streak === 5) message = '⚡ 5 seguidas! Incrível!';
     else if (streak === 10) message = '💫 10 seguidas! FENOMENAL!';
@@ -623,7 +666,8 @@ function setMode(mode) {
   } else if (mode === 'colors') {
     // Para cores, armazenar como JSON string
     words = dbColors.map(c => JSON.stringify(c));
-    el.wordsInput.value = dbColors.map(c => c.name).join(', ');
+    const colorNames = dbColors.map(c => getLocalizedColorName(c, selectedLanguage));
+    el.wordsInput.value = colorNames.join(', ');
     el.configSummary.textContent = 'Carregar/editar lista de cores';
     el.configHelp.innerHTML = 'Separe por vírgula, ponto-e-vírgula ou quebra de linha. Ex.: <code>Vermelho</code>, <code>Azul</code>, <code>Verde</code>';
     el.nextBtn.textContent = 'Próxima cor ➜';
@@ -641,6 +685,7 @@ function setMode(mode) {
   loadNewWord();
   renderStreak(0);
   updateProgress();
+  updateLanguageSelectorVisibility();
   
   el.modeSelection.classList.add('hidden');
 }
@@ -693,13 +738,51 @@ el.changeModeBtn.addEventListener('click', () => {
   el.modeSelection.classList.remove('hidden');
 });
 
+// Language selector handler
+el.languageSelector.addEventListener('change', (e) => {
+  selectedLanguage = e.target.value;
+  localStorage.setItem('selectedLanguage', selectedLanguage);
+  
+  // Reload current word to update display (for colors and numbers)
+  if ((gameMode === 'colors' || gameMode === 'numbers') && idx >= 0) {
+    loadNewWord();
+  }
+});
+
+// Initialize language selector
+el.languageSelector.value = selectedLanguage;
+
+// Show/hide language selector based on game mode
+function updateLanguageSelectorVisibility() {
+  if (gameMode === 'letters' || gameMode === 'numbers' || gameMode === 'colors') {
+    el.languageSelector.style.display = 'inline-block';
+  } else {
+    el.languageSelector.style.display = 'none';
+  }
+}
+
 // Ouvir palavra (Web Speech API)
 let voices = [];
 
-function getPtVoice() {
+function getVoiceForLanguage(lang) {
   if (!voices.length) voices = speechSynthesis.getVoices();
-  return voices.find(v => /pt|brazil/i.test(v.lang)) || voices[0];
+  
+  // Map language codes to voice language patterns
+  const langMap = {
+    'pt-BR': /pt[-_]br|portuguese.*brazil/i,
+    'en-US': /en[-_]us|english.*united.*states/i,
+    'es-ES': /es[-_]es|spanish.*spain/i,
+    'de-DE': /de[-_]de|german.*germany/i
+  };
+  
+  const pattern = langMap[lang] || /pt/i;
+  return voices.find(v => pattern.test(v.lang) || pattern.test(v.name)) || voices[0];
 }
+
+function getPtVoice() {
+  return getVoiceForLanguage(selectedLanguage);
+}
+
 if ('speechSynthesis' in window) {
   speechSynthesis.onvoiceschanged = () => {
     voices = speechSynthesis.getVoices();
@@ -714,7 +797,7 @@ el.speakBtn.addEventListener('click', () => {
   const u = new SpeechSynthesisUtterance(stripHyphens(words[deck[idx]]));
   const v = getPtVoice();
   if (v) u.voice = v;
-  u.lang = (v && v.lang) || 'pt-BR';
+  u.lang = selectedLanguage;
   u.rate = 0.95;
   u.pitch = 1.0;
   u.volume = 1.0;
@@ -778,7 +861,7 @@ if ('serviceWorker' in navigator) {
 // Interação com mascote
 const encouragements = [
   { text: 'Você está indo muito bem! 🎉', audio: 'audio/Você está indo muito bem.mp3' },
-  { text: 'Eu acredito em você! ⭐', audio: 'audio/Eu acredito em você.mp3' },
+  { text: 'Eu acredito em você! 💪', audio: 'audio/Eu acredito em você.mp3' },
   { text: 'Vamos ler mais uma? 📚', audio: 'audio/Vamos ler mais uma.mp3' },
   { text: 'Você é incrível! 🌟', audio: 'audio/Você é incrível.mp3' },
   { text: 'Cada tentativa te deixa mais forte! 🚀', audio: 'audio/Cada tentativa te deixa mais forte.mp3' },

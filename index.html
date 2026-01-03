@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#0b1024">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Leitura">
-  <title>Leitura por Sílabas – Estrelinhas ⭐</title>
+  <meta name="apple-mobile-web-app-title" content="Aprendizado">
+  <title>Aprendizado</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles.css">
@@ -19,7 +19,13 @@
     <header>
       <div class="brand">
         <div class="logo" aria-hidden="true"><span>🔤</span></div>
-        <h1>Leitura por Sílabas</h1>
+        <h1>Aprendizado</h1>
+        <select id="languageSelector" class="language-selector" title="Selecionar idioma" style="display:none;">
+          <option value="pt-BR">🇧🇷 Português</option>
+          <option value="en-US">🇺🇸 English</option>
+          <option value="es-ES">🇪🇸 Español</option>
+          <option value="de-DE">🇩🇪 Deutsch</option>
+        </select>
         <button id="changeModeBtn" class="btn-ghost btn-sm" title="Mudar modo de jogo">🔄 Trocar</button>
         <button id="toggleCaseBtn" class="btn-ghost btn-sm" title="Alternar Maiúsculas/Minúsculas">Aa</button>
       </div>
@@ -66,7 +72,7 @@
         <button id="speakBtn" class="btn-ghost" title="Ouvir a palavra">🔈 Ouvir</button>
       </div>
       <div class="actions">
-        <button id="correctBtn" class="btn-good">Acertei sozinho(a) ✨</button>
+        <button id="correctBtn" class="btn-good">Acertei sozinho(a) ✅</button>
         <button id="nextBtn" class="btn-primary">Próxima palavra ➜</button>
       </div>
       <div id="message" class="message"></div>
